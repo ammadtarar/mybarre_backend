@@ -1,0 +1,21 @@
+{
+  "name": "mybarre_backend",
+  "version": "1.0.0",
+  "description": "Backened for MYBARRE",
+  "main": "backend.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@bitbucket.org/sawatechnologies/mybarre_backend.git"
+  },
+  "keywords": [
+    "MYBARRE",
+    "Backend",
+    "Z&B"
+  ],
+  "author": "Sawa Technologies",
+  "license": "ISC",
+  "homepage": "https://bitbucket.org/sawatechnologies/mybarre_backend#readme"
+}
