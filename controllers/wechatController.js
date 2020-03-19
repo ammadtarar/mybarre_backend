@@ -1,6 +1,6 @@
 const axios = require("axios");
-const mp_app_id = "wxcece17f8b61e67ad";
-const mp_app_secret = "5c304a0cf4c96d5d582bc5e5d9b5de6d";
+const mp_app_id = "wx6aa74ef446457fe1";
+const mp_app_secret = "80e36c79580a24965685614a706fabb0";
 
 module.exports = {
   jscode2session: (jscode) => {

@@ -30,6 +30,45 @@ module.exports = function(app, middleware, db, underscore, responseController) {
 			});
 	})
 
+	app.post('/user/mp/login/by/openid', function(req, res) {
+
+		var openId = req.body.open_id || '';
+		if (openId === '') {
+			responseController.fail(res, 403, "Please send open_id in request body");
+			return;
+		}
+		var userInstance, token;
+		db.user
+			.authenticateByOpenId(openId)
+			.then(function(user) {
+				token = user.generateToken("authentication");
+				userInstance = user;
+				return db.user.update({
+					token: token
+				}, {
+					where: {
+						id: userInstance.toPublicJSON().id
+					}
+				});
+			})
+			.then(function(u) {
+				var obj = userInstance.toPublicJSON();
+				obj.token = token;
+				res.header("Token", token);
+				responseController.success(
+					res,
+					200,
+					obj
+				);
+
+			})
+			.catch(function(e) {
+				console.log(e)
+				responseController.fail(res, 404, String(e));
+			});
+
+	});
+
 	// REGISTER USING WECHAT MINIPROGRAM JSCODE
 	app.post('/user/mp/register', function(req, res) {
 		var body = underscore.pick(req.body, 'jscode');
@@ -45,16 +84,78 @@ module.exports = function(app, middleware, db, underscore, responseController) {
 						open_id: openid,
 						session_key: data.session_key
 					})
-					.then(function(user) {
-						console.log(user);
-						responseController.success(
-							res,
-							201,
-							user
-						);
+					.then(function(regUser) {
+						console.log(regUser);
+
+						var userInstance, token;
+						db.user
+							.authenticateByOpenId(regUser.open_id)
+							.then(function(user) {
+								token = user.generateToken("authentication");
+								userInstance = user;
+								return db.user.update({
+									token: token,
+									session_key: data.session_key
+								}, {
+									where: {
+										id: userInstance.toPublicJSON().id
+									}
+								});
+							})
+							.then(function(u) {
+								var obj = userInstance.toPublicJSON();
+								obj.token = token;
+								res.header("Token", token);
+								responseController.success(
+									res,
+									200,
+									obj
+								);
+
+							})
+							.catch(function(e) {
+								responseController.fail(res, 402, e);
+							});
+
 					})
 					.catch(function(e) {
-						responseController.fail(res, 404, String(e));
+						const msg = e.message;
+						if (msg === 'Validation error') {
+							var userInstance, token;
+							db.user
+								.authenticateByOpenId(openid)
+								.then(function(user) {
+									token = user.generateToken("authentication");
+									userInstance = user;
+									return db.user.update({
+										token: token,
+										session_key: data.session_key
+									}, {
+										where: {
+											id: userInstance.toPublicJSON().id
+										}
+									});
+								})
+								.then(function(u) {
+									var obj = userInstance.toPublicJSON();
+									obj.token = token;
+									res.header("Token", token);
+									responseController.success(
+										res,
+										202,
+										obj
+									);
+
+								})
+								.catch(function(e) {
+									responseController.fail(res, 402, e);
+								});
+						} else {
+							responseController.fail(res, 403, String(e));
+						}
+						console.log("");
+						console.log(msg);
+
 					});
 			})
 			.catch(function(err) {
@@ -282,7 +383,7 @@ module.exports = function(app, middleware, db, underscore, responseController) {
 
 
 	// //UPDATE EXISTING
-	app.patch('/user/update', middleware.requireAuthentication, function(req,
+	app.post('/user/update', middleware.requireAuthentication, function(req,
 		res) {
 		const body = req.body;
 		const id = parseInt(req.user.id);
@@ -322,7 +423,8 @@ module.exports = function(app, middleware, db, underscore, responseController) {
 	});
 
 	//GET PROFILE BY ID
-	app.get('/user/profile/:id', middleware.requireAuthentication, function(req,
+	app.get('/user/profile/:id', middleware.requireGlobalToken, function(
+		req,
 		res) {
 		const id = parseInt(req.params.id) || -1;
 		if (id === -1) {
@@ -334,8 +436,33 @@ module.exports = function(app, middleware, db, underscore, responseController) {
 					id: id
 				}
 			})
-			.then(function(user) {
-				responseController.success(res, 200, user.toPublicJSON())
+			.then(function(u) {
+				var responseObj = {
+					user: u
+				}
+				db.order.findAll({
+						where: {
+							userId: u.id
+						},
+						include: [{
+							model: db.order_items,
+							as: 'items',
+							attributes: {
+								exclude: ['createdAt', 'updatedAt', 'userId', 'productId',
+									'orderId'
+								]
+							},
+							include: [{
+								model: db.product,
+								as: 'product'
+							}]
+						}]
+					})
+					.then(function(orders) {
+						responseObj.orders = orders;
+						responseController.success(res, 200, responseObj);
+					})
+
 			})
 	});
 

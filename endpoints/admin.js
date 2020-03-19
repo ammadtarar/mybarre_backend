@@ -28,10 +28,9 @@ module.exports = function(app, middleware, db, underscore, responseController) {
 					admin.password = pwd
 					emailController.sendAdminCreationEmail(admin)
 						.then(function() {
-							responseController.success(res, 201, user.toPublicJSON())
+							responseController.success(res, 201, user)
 						})
 						.catch(function(e) {
-
 							responseController.fail(res, 406, e);
 						})
 

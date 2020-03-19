@@ -46,6 +46,7 @@ module.exports = function(app, middleware, db, underscore, responseController) {
 			});
 	});
 
+
 	app.get('/bundle/list/all', middleware.requireGlobalToken, function(req, res) {
 		var limit = parseInt(req.query.limit) || 10;
 		var page = parseInt(req.query.page) || 0;

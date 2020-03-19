@@ -12,10 +12,6 @@ module.exports = function(sequelize, DataTypes) {
       },
       phone: {
         type: DataTypes.STRING,
-        unique: true,
-        validate: {
-          isNumeric: true
-        }
       },
       avatar_url: {
         type: DataTypes.STRING,
@@ -78,6 +74,9 @@ module.exports = function(sequelize, DataTypes) {
       current_status: {
         type: DataTypes.STRING
       },
+      email: {
+        type: DataTypes.STRING
+      },
       goals: {
         type: DataTypes.STRING
       },
@@ -105,9 +104,6 @@ module.exports = function(sequelize, DataTypes) {
         set: function(val) {
           return this.setDataValue('qualifications', JSON.stringify(val));
         }
-      },
-      heart_condition: {
-        type: DataTypes.BOOLEAN
       },
       heart_condition: {
         type: DataTypes.BOOLEAN
@@ -150,6 +146,10 @@ module.exports = function(sequelize, DataTypes) {
           }
         })
         .then(function(user) {
+          if (user === undefined || user === null || user === 'null') {
+            reject("User not found");
+            return
+          }
           resolve(user);
         })
         .catch(function(e) {
@@ -208,7 +208,7 @@ module.exports = function(sequelize, DataTypes) {
     var json = this.toJSON();
     return _.pick(json, 'id',
       'createdAt', 'updatedAt', 'name',
-      'phone', 'avatar_url', 'open_id');
+      'phone', 'avatar_url', 'open_id', 'email', 'gender');
   };
 
   return user;
