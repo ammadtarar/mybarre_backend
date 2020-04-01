@@ -33,6 +33,7 @@ module.exports = function(sequelize, DataTypes) {
 				'training-videos-submitted', // USER SUBMITTED TRAINING VIDEOS AFTER TRAINING CLASSES
 				'exam-passed', // SUBMITTED TRAINING VIDEOS PASSED
 				'exam-failed', // SUBMITTED TRAINING VIDEOS FAILED
+				'license-fee-paid', // USER PASSED THE EXAM AND PAID THE LICENSE FEE
 				'licensed-instructor' // USER PASSED THE EXAM AND PAID THE LICENSE FEE
 			],
 			defaultValue: 'pre-instructor'

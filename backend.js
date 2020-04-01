@@ -24,7 +24,7 @@ app.use(function(req, res, next) {
 app.use(bodyParser.json());
 app.use(middleware.logger);
 
-
+require('./endpoints/dashboard.js')(app, middleware, db, _, responseController);
 require('./endpoints/admin.js')(app, middleware, db, _, responseController);
 require('./endpoints/user.js')(app, middleware, db, _, responseController);
 require('./endpoints/files.js')(app, db, __dirname, middleware,

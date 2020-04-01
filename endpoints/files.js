@@ -65,6 +65,12 @@ module.exports = function(app, db, rootDir, middleware, responseController) {
 
 			} else if (req.headers.type.toLowerCase() === "training_videos") {
 
+				console.log();
+				console.log();
+				console.log();
+				console.log("HELLO ");
+				console.log();
+				console.log();
 				const sub_dir = diskDirectory + "/" + req.headers.base;
 				if (!fs.existsSync(sub_dir)) {
 					fs.mkdirSync(sub_dir);
@@ -427,6 +433,11 @@ module.exports = function(app, db, rootDir, middleware, responseController) {
 					req.headers.itemName = itemName;
 					req.headers.path = "TrainingVideos/" + String(membership.id) + '/' +
 						itemName;
+					console.log();
+					console.log();
+					console.log("HEADER");
+					console.log(req.headers);
+
 					upload(req, res, function(err) {
 						if (req.fileValidationError) {
 							responseController.fail(res, 404, {

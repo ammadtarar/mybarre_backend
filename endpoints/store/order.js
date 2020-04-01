@@ -46,7 +46,7 @@ module.exports = function(app, middleware, db, underscore, responseController) {
 							items.push({
 								productId: cartItem.productId,
 								userId: cartItem.userId,
-								orderId: order.id,
+								storeOrderId: order.id,
 								count: cartItem.count
 							});
 							deletableCartItemIds.push(cartItem.id);

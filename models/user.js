@@ -22,6 +22,9 @@ module.exports = function(sequelize, DataTypes) {
         allowNull: true,
         unique: true
       },
+      occupation: {
+        type: DataTypes.STRING
+      },
       gender: {
         type: DataTypes.INTEGER
       },

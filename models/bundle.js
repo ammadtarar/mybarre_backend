@@ -18,6 +18,10 @@ module.exports = function(sequelize, DataTypes) {
 			type: DataTypes.STRING,
 			allowNull: true,
 			defaultValue: 'FREE'
+		},
+		cover_url: {
+			type: DataTypes.STRING,
+			allowNull: true
 		}
 	});
 };

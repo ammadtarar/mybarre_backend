@@ -105,7 +105,7 @@ module.exports = function(app, middleware, db, underscore, responseController) {
 	app.post('/bundle/create', middleware.requireAdminAuthentication, function(
 		req, res) {
 		var body = underscore.pick(req.body, 'name', 'description', 'price',
-			'type');
+			'type', 'cover_url');
 		if (body === null || body === undefined || isEmpty(body)) {
 			responseController.fail(res, 403,
 				"Please send bundle name , description , price and type in request body"
@@ -131,7 +131,7 @@ module.exports = function(app, middleware, db, underscore, responseController) {
 			return;
 		};
 		var body = underscore.pick(req.body, 'name', 'description', 'price',
-			'type');
+			'type', 'cover_url');
 		if (body === null || body === undefined || isEmpty(body)) {
 			responseController.fail(res, 403,
 				"Please send bundle name , description , price and type in request body"
@@ -217,6 +217,147 @@ module.exports = function(app, middleware, db, underscore, responseController) {
 					});
 			});
 	});
+
+
+
+	app.get('/user/ce/list/all', middleware.requireAuthentication, function(req,
+		res) {
+
+		db.user.findOne({
+				where: {
+					id: req.user.id
+				},
+				include: [{
+					model: db.bundle,
+					as: 'bundles',
+					through: {
+						attributes: []
+					},
+					include: [{
+						model: db.files,
+						as: 'files',
+						attributes: {
+							exclude: ['createdAt', 'updatedAt', 'bundleId']
+						}
+					}]
+				}]
+			})
+			.then(function(bundles) {
+				console.log(bundles);
+				responseController.success(
+					res,
+					200,
+					bundles.bundles
+				);
+			})
+			.catch(function(e) {
+				responseController.fail(res, 406, e);
+			});
+
+	});
+
+
+	app.get('/ce/store/list/all', middleware.requireAuthentication, function(
+		req,
+		res) {
+
+		db.bundle.findAll({
+				where: {
+					id: {
+						[db.Op.gt]: 1
+					}
+				},
+				include: [{
+					model: db.files,
+					as: 'files',
+					attributes: {
+						exclude: ['createdAt', 'updatedAt', 'bundleId']
+					}
+				}]
+			})
+			.then(function(bundles) {
+
+				db.user_bundles.findAll({
+						where: {
+							userId: req.user.id
+						}
+					})
+					.then(function(userData) {
+
+
+						var existingBundles = [];
+						userData.forEach(function(userObj) {
+							bundles.forEach(function(bundle) {
+								if (bundle.id === userObj.bundleId) {
+									existingBundles.push(bundle);
+								}
+							})
+						});
+
+						bundles = bundles.filter(val => !existingBundles.includes(val));
+						responseController.success(res, 200, bundles)
+
+
+					})
+
+
+			})
+			.catch(function(e) {
+				responseController.fail(res, 406, e);
+			});
+
+	});
+
+	app.post('/user/add/bundle/:id', middleware.requireAuthentication, function(
+		req, res) {
+		var id = parseInt(req.params.id);
+		if (id === undefined || id === null || id <= 0) {
+			responseController.fail(res, 403, "Please provide a valid bundle ID");
+			return;
+		}
+
+		const body = req.body || null;
+		if (body === null) {
+			responseController.fail(res, 404,
+				"Please provide out_trade_no and price in request body");
+			return;
+		}
+		const out_trade_no = body.out_trade_no || null;
+		if (out_trade_no === null) {
+			responseController.fail(res, 404,
+				"Please provide out_trade_no in request body");
+			return;
+		}
+		const price = body.price || null;
+		if (price === null) {
+			responseController.fail(res, 404, "Please provide price in request body");
+			return;
+		}
+
+
+		db.user_bundles.findOne({
+				where: {
+					userId: req.user.id,
+					bundleId: id
+				}
+			})
+			.then(function(bundle) {
+				if (bundle) {
+					responseController.fail(res, 403, "User already bought this bundle");
+					return;
+				}
+				db.user_bundles.create({
+						userId: req.user.id,
+						bundleId: id,
+						out_trade_no: out_trade_no,
+						price: price
+					})
+					.then(function(response) {
+						responseController.success(res, 200, response);
+					})
+			})
+
+	})
 
 
 };

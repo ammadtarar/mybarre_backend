@@ -22,9 +22,21 @@ db.bundle = sequelize.import('../models/bundle.js');
 db.bundle.hasMany(db.files, {
   as: 'files'
 });
-db.user.hasMany(db.bundle, {
+
+
+const user_bundles = sequelize.define('user_bundles', {
+  out_trade_no: {
+    type: Sequelize.STRING
+  },
+  price: {
+    type: Sequelize.NUMBER
+  },
+});
+db.user_bundles = user_bundles;
+db.user.belongsToMany(db.bundle, {
+  through: user_bundles,
   as: 'bundles'
-})
+});
 
 //COURSE
 db.course = sequelize.import('../models/course/course.js');
@@ -45,6 +57,8 @@ db.user.hasMany(db.membership, {
 db.membership.hasMany(db.files, {
   as: 'training_videos'
 });
+
+
 
 //STORE
 db.product = sequelize.import('../models/store/product.js');

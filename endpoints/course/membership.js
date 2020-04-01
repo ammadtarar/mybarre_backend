@@ -279,7 +279,19 @@ module.exports = function(app, middleware, db, underscore, responseController,
 						return;
 					}
 					const status = membership.status;
-					if (status !== 'pre-instructor' || status !== 'pre-instructor-tbc') {
+
+					// const statuses = [
+					// 	'pre-instructor', // MEANS USER PAIDED AND SIGNED UP
+					// 	'pre-instructor-tbc', //USER DID NOT ATTEND TRAINING CLASSES
+					// 	'instructor-in-training', // USER ATTENDED THE TRAINING CLASSES
+					// 	'training-videos-submitted', // USER SUBMITTED TRAINING VIDEOS AFTER TRAINING CLASSES
+					// 	'exam-passed', // SUBMITTED TRAINING VIDEOS PASSED
+					// 	'exam-failed', // SUBMITTED TRAINING VIDEOS FAILED
+					// 	'licensed-fee-paid', // USER PASSED THE EXAM AND PAID THE LICENSE FEE
+					// 	'licensed-instructor' // USER PASSED THE EXAM AND PAID THE LICENSE FEE
+					// ];
+
+					if (status !== 'pre-instructor') {
 						responseController.fail(res, 403,
 							"User has already checked in for the courses training");
 						return;
@@ -338,6 +350,36 @@ module.exports = function(app, middleware, db, underscore, responseController,
 		});
 
 
+	app.post('/user/membership/:id/add/license/out_trade_no', middleware.requireAuthentication,
+		function(req, res) {
+			var id = parseInt(req.params.id);
+			if (id === undefined || id === null || id <= 0) {
+				responseController.fail(res, 403, "Please provide a valid membership ID");
+				return;
+			}
+			var out_trade_no = req.body.out_trade_no || null;
+			if (out_trade_no === null) {
+				responseController.fail(res, 403,
+					"Please provide a license out_trade_no in request body");
+				return;
+			}
+			db.membership.update({
+					license_out_trade_no: out_trade_no,
+					status: 'license-fee-paid'
+				}, {
+					where: {
+						id: id
+					}
+				})
+				.then(function(response) {
+					responseController.success(res, 200, 'Membership updated');
+				})
+				.catch(function(updateErr) {
+					responseController.fail(res, 403, String(updateErr));
+				});
+		});
+
+
 	app.patch('/user/membership/:id/extend/submission', middleware.requireAdminAuthentication,
 		function(req, res) {
 			var id = parseInt(req.params.id);
@@ -393,6 +435,7 @@ module.exports = function(app, middleware, db, underscore, responseController,
 				'training-videos-submitted', // USER SUBMITTED TRAINING VIDEOS AFTER TRAINING CLASSES
 				'exam-passed', // SUBMITTED TRAINING VIDEOS PASSED
 				'exam-failed', // SUBMITTED TRAINING VIDEOS FAILED
+				'license-fee-paid',
 				'licensed-instructor' // USER PASSED THE EXAM AND PAID THE LICENSE FEE
 			];
 			if (!validStatuses.includes(status)) {
