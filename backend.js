@@ -16,7 +16,7 @@ app.use(function(req, res, next) {
 	res.header("Access-Control-Allow-Methods",
 		"GET,HEAD,OPTIONS,POST,PUT,PATCH,DELETE");
 	res.header("Access-Control-Allow-Headers",
-		"*"
+		"Authorization,Content-Type,Accept,Origin,User-Agent,DNT,Cache-Control,X-Mx-ReqToken,Keep-Alive,X-Requested-With,If-Modified-Since,name,type"
 	);
 	next();
 });
