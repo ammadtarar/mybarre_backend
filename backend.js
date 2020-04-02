@@ -23,6 +23,7 @@ app.use(function(req, res, next) {
 
 app.use(bodyParser.json());
 app.use(middleware.logger);
+app.use(express.urlencoded());
 
 require('./endpoints/dashboard.js')(app, middleware, db, _, responseController);
 require('./endpoints/admin.js')(app, middleware, db, _, responseController);

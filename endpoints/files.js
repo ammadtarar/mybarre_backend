@@ -26,13 +26,13 @@ module.exports = function(app, db, rootDir, middleware, responseController) {
 	const storage = multer.diskStorage({
 		destination: function(req, file, callback) {
 
-			if (req.headers.type.toLowerCase() === "bundle") {
-				const sub_dir = diskDirectory + "/" + req.headers.base;
+			if (req.query.type.toLowerCase() === "bundle") {
+				const sub_dir = diskDirectory + "/" + req.query.base;
 				if (!fs.existsSync(sub_dir)) {
 					fs.mkdirSync(sub_dir);
 				}
 
-				const bundleDir = sub_dir + '/' + req.headers.bundleName;
+				const bundleDir = sub_dir + '/' + req.query.bundleName;
 				if (!fs.existsSync(bundleDir)) {
 					fs.mkdirSync(bundleDir);
 				}
@@ -53,7 +53,7 @@ module.exports = function(app, db, rootDir, middleware, responseController) {
 				}
 
 				if (type === "Videos") {
-					const itemDir = typeDir + '/' + req.headers.itemName;
+					const itemDir = typeDir + '/' + req.query.itemName;
 					if (!fs.existsSync(itemDir)) {
 						fs.mkdirSync(itemDir);
 					}
@@ -63,7 +63,7 @@ module.exports = function(app, db, rootDir, middleware, responseController) {
 				}
 
 
-			} else if (req.headers.type.toLowerCase() === "training_videos") {
+			} else if (req.query.type.toLowerCase() === "training_videos") {
 
 				console.log();
 				console.log();
@@ -71,12 +71,12 @@ module.exports = function(app, db, rootDir, middleware, responseController) {
 				console.log("HELLO ");
 				console.log();
 				console.log();
-				const sub_dir = diskDirectory + "/" + req.headers.base;
+				const sub_dir = diskDirectory + "/" + req.query.base;
 				if (!fs.existsSync(sub_dir)) {
 					fs.mkdirSync(sub_dir);
 				}
 
-				const bundleDir = sub_dir + '/' + String(req.headers.membership.id);
+				const bundleDir = sub_dir + '/' + String(req.query.membership.id);
 				if (!fs.existsSync(bundleDir)) {
 					fs.mkdirSync(bundleDir);
 				}
@@ -97,7 +97,7 @@ module.exports = function(app, db, rootDir, middleware, responseController) {
 				}
 
 				if (type === "Videos") {
-					const itemDir = typeDir + '/' + req.headers.itemName;
+					const itemDir = typeDir + '/' + req.query.itemName;
 					if (!fs.existsSync(itemDir)) {
 						fs.mkdirSync(itemDir);
 					}
@@ -107,7 +107,7 @@ module.exports = function(app, db, rootDir, middleware, responseController) {
 				}
 
 			} else {
-				var type = req.headers.type || 'others';
+				var type = req.query.type || 'others';
 				type = type.charAt(0).toUpperCase() + type.slice(1)
 				const sub_dir = diskDirectory + '/' + type;
 				if (!fs.existsSync(sub_dir)) {
@@ -137,7 +137,7 @@ module.exports = function(app, db, rootDir, middleware, responseController) {
 			}
 		},
 		filename: function(req, file, callback) {
-			var fileName = req.headers.itemName || file.originalname;
+			var fileName = req.query.itemName || file.originalname;
 			const name = fileName + "-" + String(Date.now()) + '.' +
 				file.originalname
 				.split('.').pop();
@@ -148,7 +148,7 @@ module.exports = function(app, db, rootDir, middleware, responseController) {
 	const upload = multer({
 		storage: storage,
 		fileFilter: function(req, file, cb) {
-			if (!req.headers.type) {
+			if (!req.query.type) {
 				req.fileValidationError = type_error_msg;
 				return cb(null, false, new Error(type_error_msg));
 			}
@@ -160,8 +160,7 @@ module.exports = function(app, db, rootDir, middleware, responseController) {
 	}).single('file');
 
 	function makeDownloadUrl(req, fileName) {
-		return req.protocol + '://' + req.headers.host +
-			'/download/' + fileName;
+		return process.env.base_url + '/download/' + fileName
 	}
 
 
@@ -258,7 +257,14 @@ module.exports = function(app, db, rootDir, middleware, responseController) {
 
 	app.post('/file/upload', middleware.requireGlobalToken, function(req, res) {
 
-		var type = req.headers.type || "";
+		console.log("PARAMS");
+		console.log(req.query);
+		console.log("BODY");
+		console.log(req.body);
+		console.log("HEADERS");
+		console.log(req.query);
+
+		var type = req.query.type || "";
 		if (type === "") {
 			responseController.fail(res, 444, {
 				message: "Please send 'type' in request headers. Only two type of file uploads are permitted, 1- BUNDLE , 2- OTHERS. If this file belongs to a bundle , please pass type , bundle_id and item_name in request headers. If type is NOT of OTHERS type , just pass type=OTHERS without any other fields"
@@ -268,14 +274,14 @@ module.exports = function(app, db, rootDir, middleware, responseController) {
 		type = type.toLowerCase();
 		if (type === "bundle") {
 			console.log("==== INSIDE BUNDLE");
-			const bundleId = parseInt(req.headers.bundle_id) || -1;
+			const bundleId = parseInt(req.query.bundle_id) || -1;
 			if (bundleId === -1) {
 				responseController.fail(res, 444, {
 					message: "bundle_id is missing from the headers. bundle_id and item_name are required when type=BUNDLE"
 				})
 				return;
 			}
-			var itemName = req.headers.item_name || '';
+			var itemName = req.query.item_name || '';
 			if (itemName === '') {
 				responseController.fail(res, 444, {
 					message: "item_name is missing from the headers. item_name is required when type=BUNDLE"
@@ -300,10 +306,10 @@ module.exports = function(app, db, rootDir, middleware, responseController) {
 					var bundleName = bundle.name;
 					bundleName = bundleName.replace(' ', '_');
 					itemName = itemName.replace(' ', '_');
-					req.headers.base = 'Bundles';
-					req.headers.bundleName = bundleName;
-					req.headers.itemName = itemName;
-					req.headers.path = "bundles/" + bundleName + '/' + itemName;
+					req.query.base = 'Bundles';
+					req.query.bundleName = bundleName;
+					req.query.itemName = itemName;
+					req.query.path = "bundles/" + bundleName + '/' + itemName;
 					upload(req, res, function(err) {
 						if (req.fileValidationError) {
 							responseController.fail(res, 404, {
@@ -325,7 +331,7 @@ module.exports = function(app, db, rootDir, middleware, responseController) {
 							return;
 						}
 						const fileName = req.file.filename;
-						const path = req.headers.path;
+						const path = req.query.path;
 						const fullUrl = makeDownloadUrl(req, fileName);
 						var fileObject = {};
 						console.log("==== FILE UPLOADED ");
@@ -353,7 +359,7 @@ module.exports = function(app, db, rootDir, middleware, responseController) {
 								console.log(result);
 
 								db.files.create({
-										name: req.headers.item_name,
+										name: req.query.item_name,
 										mime: req.file.mimetype,
 										url: fullUrl,
 										thumb_url: makeDownloadUrl(req, result),
@@ -369,7 +375,7 @@ module.exports = function(app, db, rootDir, middleware, responseController) {
 							})
 						} else {
 							db.files.create({
-									name: req.headers.item_name,
+									name: req.query.item_name,
 									mime: req.file.mimetype,
 									url: fullUrl,
 									thumb_url: '',
@@ -389,22 +395,14 @@ module.exports = function(app, db, rootDir, middleware, responseController) {
 				})
 			return;
 		} else if (type === "training_videos") {
-			console.log("==== INSIDE BUNDLE");
-			console.log();
-			console.log();
-			console.log("req.headers.membershipId = ");
-			console.log(req.headers.membership_id);
-			console.log(req.headers);
-			console.log();
-			console.log();
-			const membershipId = parseInt(req.headers.membership_id) || -1;
+			const membershipId = parseInt(req.query.membership_id) || -1;
 			if (membershipId === -1) {
 				responseController.fail(res, 444, {
 					message: "membershipId is missing from the headers. membershipId and item_name are required when type=training_videos"
 				})
 				return;
 			}
-			var itemName = req.headers.item_name || '';
+			var itemName = req.query.item_name || '';
 			if (itemName === '') {
 				responseController.fail(res, 444, {
 					message: "item_name is missing from the headers. item_name is required when type=training_videos"
@@ -428,15 +426,15 @@ module.exports = function(app, db, rootDir, middleware, responseController) {
 					}
 
 					itemName = itemName.replace(' ', '_');
-					req.headers.base = 'TrainingVideos';
-					req.headers.membership = membership;
-					req.headers.itemName = itemName;
-					req.headers.path = "TrainingVideos/" + String(membership.id) + '/' +
+					req.query.base = 'TrainingVideos';
+					req.query.membership = membership;
+					req.query.itemName = itemName;
+					req.query.path = "TrainingVideos/" + String(membership.id) + '/' +
 						itemName;
 					console.log();
 					console.log();
 					console.log("HEADER");
-					console.log(req.headers);
+					console.log(req.query);
 
 					upload(req, res, function(err) {
 						if (req.fileValidationError) {
@@ -459,7 +457,7 @@ module.exports = function(app, db, rootDir, middleware, responseController) {
 							return;
 						}
 						const fileName = req.file.filename;
-						const path = req.headers.path;
+						const path = req.query.path;
 						const fullUrl = makeDownloadUrl(req, fileName);
 						var fileObject = {};
 						console.log("==== FILE UPLOADED ");
@@ -484,7 +482,7 @@ module.exports = function(app, db, rootDir, middleware, responseController) {
 							console.log(result);
 
 							db.files.create({
-									name: req.headers.item_name,
+									name: req.query.item_name,
 									mime: req.file.mimetype,
 									url: fullUrl,
 									thumb_url: makeDownloadUrl(req, result),
