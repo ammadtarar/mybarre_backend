@@ -5,6 +5,13 @@ const path = require('path');
 const ThumbnailGenerator = require('video-thumbnail-generator').default;
 const filesController = require('../controllers/filesController.js')
 
+String.prototype.replaceAll = function(str1, str2, ignore) {
+	return this.replace(new RegExp(str1.replace(
+			/([\/\,\!\\\^\$\{\}\[\]\(\)\.\*\+\?\|\<\>\-\&])/g, "\\$&"), (ignore ?
+			"gi" : "g")), (typeof(str2) == "string") ? str2.replace(/\$/g, "$$$$") :
+		str2);
+}
+
 const type_error_msg =
 	'Please provide type aka directory in request header. For example , if its an image for event then type = event';
 
@@ -65,12 +72,6 @@ module.exports = function(app, db, rootDir, middleware, responseController) {
 
 			} else if (req.query.type.toLowerCase() === "training_videos") {
 
-				console.log();
-				console.log();
-				console.log();
-				console.log("HELLO ");
-				console.log();
-				console.log();
 				const sub_dir = diskDirectory + "/" + req.query.base;
 				if (!fs.existsSync(sub_dir)) {
 					fs.mkdirSync(sub_dir);
@@ -137,10 +138,10 @@ module.exports = function(app, db, rootDir, middleware, responseController) {
 			}
 		},
 		filename: function(req, file, callback) {
-			var fileName = req.query.itemName || file.originalname;
-			const name = fileName + "-" + String(Date.now()) + '.' +
-				file.originalname
-				.split('.').pop();
+			// var fileName = req.query.itemName || file.originalname;
+			// const name = fileName + "-" + String(Date.now()) + '.' + file.originalname.split('.').pop();
+			var name = String(Date.now()) + '.' + file.originalname.split('.').pop();
+			name = name.replaceAll(" ", "");
 			callback(null, name);
 		}
 	});
@@ -330,13 +331,13 @@ module.exports = function(app, db, rootDir, middleware, responseController) {
 							})
 							return;
 						}
-						const fileName = req.file.filename;
+						var fileName = req.file.filename;
 						const path = req.query.path;
 						const fullUrl = makeDownloadUrl(req, fileName);
 						var fileObject = {};
 						console.log("==== FILE UPLOADED ");
 						if (req.file.mimetype.includes('vid')) {
-
+							fileName = fileName.replaceAll(" ", "");
 
 							const videoFilePath = rootDir + "/" + filesController.findFile(
 								diskDirectory,
@@ -345,18 +346,13 @@ module.exports = function(app, db, rootDir, middleware, responseController) {
 								fileName,
 								'');
 
-							console.log({
-								sourcePath: videoFilePath,
-								thumbnailPath: thumbFilePath
-							});
 							const tg = new ThumbnailGenerator({
 								sourcePath: videoFilePath,
 								thumbnailPath: thumbFilePath
 							});
 							tg.generateOneByPercentCb(50, {
-								size: '640x400'
+								size: '320x200'
 							}, (err, result) => {
-								console.log(result);
 
 								db.files.create({
 										name: req.query.item_name,

@@ -57,8 +57,8 @@ module.exports = async function(app, middleware, db, underscore,
 					}
 				})
 				.then(function(users) {
-					resolve(users[0].dataValues.total || 0);
-
+					resolve((Math.round((users[0].dataValues.total || 0) * 100) / 100).toFixed(
+						2));
 				})
 				.catch(function(error) {
 					reject(error)
@@ -86,7 +86,8 @@ module.exports = async function(app, middleware, db, underscore,
 					}
 				})
 				.then(function(users) {
-					resolve(users[0].dataValues.total || 0);
+					resolve((Math.round((users[0].dataValues.total || 0) * 100) / 100).toFixed(
+						2));
 
 				})
 				.catch(function(error) {
@@ -115,7 +116,8 @@ module.exports = async function(app, middleware, db, underscore,
 					}
 				})
 				.then(function(users) {
-					resolve(users[0].dataValues.total || 0);
+					resolve((Math.round((users[0].dataValues.total || 0) * 100) / 100).toFixed(
+						2));
 
 				})
 				.catch(function(error) {
