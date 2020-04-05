@@ -10,6 +10,33 @@ function isEmpty(obj) {
 module.exports = async function(app, middleware, db, underscore,
 	responseController) {
 
+	async function getTotal(model) {
+		return new Promise(function(resolve, reject) {
+			model.count()
+				.then(function(users) {
+					resolve(users);
+				})
+				.catch(function(error) {
+					reject(error)
+				})
+		});
+	};
+
+	async function getTotalsByDate(model) {
+		return new Promise(function(resolve, reject) {
+			model.findAll({
+					attributes: [
+						[db.sequelize.literal(`DATE("createdAt")`), 'date'],
+						[db.sequelize.literal(`COUNT(*)`), 'count']
+					],
+					group: ['date'],
+				})
+				.then(function(response) {
+					resolve(response);
+				})
+
+		});
+	};
 
 
 	async function get(model, d) {
@@ -126,93 +153,92 @@ module.exports = async function(app, middleware, db, underscore,
 		})
 	};
 
+
+
+	app.get('/dashboard/revnue', middleware.requireAdminAuthentication, function(
+		req, res) {
+
+
+		db.user_bundles.findAll({
+				attributes: [
+					[db.sequelize.fn('sum', db.sequelize.col('price')), 'total'],
+				],
+			})
+			.then(function(users) {
+				const bundlesRevenue = (Math.round((users[0].dataValues.total || 0) *
+					100) / 100).toFixed(2)
+				db.order.findAll({
+						attributes: [
+							[db.sequelize.fn('sum', db.sequelize.col('amount')), 'total'],
+						]
+					})
+					.then(function(users) {
+						const storeRevenue = (Math.round((users[0].dataValues.total || 0) *
+							100) / 100).toFixed(
+							2);
+						db.membership.findAll({
+								attributes: [
+									[db.sequelize.fn('sum', db.sequelize.col('price')), 'total'],
+								]
+							})
+							.then(function(users) {
+								const membershipsRevenue = (Math.round((users[0].dataValues.total ||
+									0) * 100) / 100).toFixed(
+									2);
+
+								responseController.success(res, 200, {
+									membership: membershipsRevenue,
+									store: storeRevenue,
+									bundles: bundlesRevenue
+								})
+							})
+
+					})
+			})
+	});
+
+
+
 	app.get('/dashboard/users', middleware.requireAdminAuthentication, async function(
 		req, res) {
-		responseController.success(res, 200, {
-			today: await get(db.user, 0),
-			week: await get(db.user, 7),
-			month: await get(db.user, 30),
-			quarter: await get(db.user, 120),
-			halfyear: await get(db.user, 180),
-			year: await get(db.user, 360),
-		});
+
+		db.user.findAll({
+				attributes: [
+					[db.sequelize.literal(`DATE("createdAt")`), 'date'],
+					[db.sequelize.literal(`COUNT(*)`), 'count']
+				],
+				group: ['date'],
+			})
+			.then(function(response) {
+				responseController.success(res, 200, response)
+			})
 	});
 
-	app.get('/dashboard/bundles', middleware.requireAdminAuthentication, async function(
+	app.get('/dashboard/total', middleware.requireAdminAuthentication, async function(
 		req, res) {
 		responseController.success(res, 200, {
-			today: await get(db.user_bundles, 0),
-			week: await get(db.user_bundles, 7),
-			month: await get(db.user_bundles, 30),
-			quarter: await get(db.user_bundles, 120),
-			halfyear: await get(db.user_bundles, 180),
-			year: await get(db.user_bundles, 360),
+			users: await getTotal(db.user),
+			admins: await getTotal(db.admin),
+			bundles: await getTotal(db.bundle),
+			products: await getTotal(db.product),
+			orders: await getTotal(db.order),
+			memberships: await getTotal(db.membership),
+			courses: await getTotal(db.course),
+			files: await getTotal(db.files),
 		});
 	});
 
-	app.get('/dashboard/orders', middleware.requireAdminAuthentication, async function(
+	app.get('/dashboard/graphs', middleware.requireAdminAuthentication, async function(
 		req, res) {
 		responseController.success(res, 200, {
-			today: await get(db.order, 0),
-			week: await get(db.order, 7),
-			month: await get(db.order, 30),
-			quarter: await get(db.order, 120),
-			halfyear: await get(db.order, 180),
-			year: await get(db.order, 360),
+			users: await getTotalsByDate(db.user),
+			admins: await getTotalsByDate(db.admin),
+			storeOrders: await getTotalsByDate(db.order),
+			bundleOrders: await getTotalsByDate(db.user_bundles),
+			memberships: await getTotalsByDate(db.membership)
 		});
 	});
 
-	app.get('/dashboard/memberships', middleware.requireAdminAuthentication,
-		async function(
-			req, res) {
-			responseController.success(res, 200, {
-				today: await get(db.membership, 0),
-				week: await get(db.membership, 7),
-				month: await get(db.membership, 30),
-				quarter: await get(db.membership, 120),
-				halfyear: await get(db.membership, 180),
-				year: await get(db.membership, 360),
-			});
-		});
-
-
-	app.get('/dashboard/memberships/revenue', middleware.requireAdminAuthentication,
-		async function(req, res) {
-			responseController.success(res, 200, {
-				today: await getMembershipRevenue(0),
-				week: await getMembershipRevenue(7),
-				month: await getMembershipRevenue(30),
-				quarter: await getMembershipRevenue(120),
-				halfyear: await getMembershipRevenue(180),
-				year: await getMembershipRevenue(360),
-			});
-		})
-
-
-	app.get('/dashboard/store/revenue', middleware.requireAdminAuthentication,
-		async function(req, res) {
-			responseController.success(res, 200, {
-				today: await getStoreRevenue(0),
-				week: await getStoreRevenue(7),
-				month: await getStoreRevenue(30),
-				quarter: await getStoreRevenue(120),
-				halfyear: await getStoreRevenue(180),
-				year: await getStoreRevenue(360),
-			});
-		})
-
-
-	app.get('/dashboard/bundles/revenue', middleware.requireAdminAuthentication,
-		async function(req, res) {
-			responseController.success(res, 200, {
-				today: await getBundlesRevnue(0),
-				week: await getBundlesRevnue(7),
-				month: await getBundlesRevnue(30),
-				quarter: await getBundlesRevnue(120),
-				halfyear: await getBundlesRevnue(180),
-				year: await getBundlesRevnue(360),
-			});
-		})
 
 
 };
