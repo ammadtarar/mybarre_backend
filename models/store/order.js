@@ -12,7 +12,7 @@ module.exports = function(sequelize, DataTypes) {
 			type: DataTypes.STRING
 		},
 		amount: {
-			type: DataTypes.NUMBER
+			type: DataTypes.FLOAT
 		},
 		address: {
 			type: DataTypes.STRING,
@@ -36,6 +36,10 @@ module.exports = function(sequelize, DataTypes) {
 			allowNull: true
 		},
 		tacking_number: {
+			type: DataTypes.STRING,
+			allowNull: true
+		},
+		remarks: {
 			type: DataTypes.STRING,
 			allowNull: true
 		}

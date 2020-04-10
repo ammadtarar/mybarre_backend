@@ -20,17 +20,17 @@ module.exports = function(sequelize, DataTypes) {
 			}
 		},
 		price: {
-			type: DataTypes.NUMBER,
+			type: DataTypes.FLOAT,
 			allowNull: false,
 			defaultValue: 0.00
 		},
 		seats: {
-			type: DataTypes.NUMBER,
+			type: DataTypes.INTEGER,
 			allowNull: false,
 			defaultValue: 0
 		},
 		available_seats: {
-			type: DataTypes.NUMBER,
+			type: DataTypes.INTEGER,
 			allowNull: false,
 			defaultValue: 0
 		}

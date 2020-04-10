@@ -19,7 +19,7 @@ module.exports = {
     //   queryInterface.addColumn(
     //     'user_bundles',
     //     'price',
-    //     Sequelize.NUMBER
+    //     Sequelize.INTEGER
     //   )
     // ]);
   },

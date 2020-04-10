@@ -76,6 +76,19 @@ module.exports = function(app, middleware, db, underscore, responseController) {
 					console.log();
 					console.log();
 					console.log("WECHAT REPONSE");
+					console.log();
+					console.log();
+					console.log();
+					console.log();
+					console.log();
+					console.log("return_code => ", response.xml.return_code.text());
+					console.log("return_msg => ", response.xml.return_msg.text());
+					console.log();
+					console.log();
+					console.log();
+					console.log();
+					console.log();
+					console.log();
 					const code = response.xml.return_code.text();
 					if (code === "FAIL") {
 						res.status(401).json({
@@ -84,8 +97,7 @@ module.exports = function(app, middleware, db, underscore, responseController) {
 						return;
 					}
 
-					console.log("return_code => ", response.xml.return_code.text());
-					console.log("return_msg => ", response.xml.return_msg.text());
+
 					// console.log("err_code => ", response.xml.err_code.text());
 					// console.log("err_code_des => ", response.xml.err_code_des.text());
 					// console.log("result_code => ", response.xml.result_code.text());

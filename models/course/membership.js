@@ -16,7 +16,7 @@ module.exports = function(sequelize, DataTypes) {
 			}
 		},
 		price: {
-			type: DataTypes.NUMBER,
+			type: DataTypes.FLOAT,
 			allowNull: false,
 			defaultValue: 0.00
 		},

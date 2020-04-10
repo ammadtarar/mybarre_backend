@@ -1,10 +1,26 @@
 const Sequelize = require('sequelize');
 
-const sequelize = new Sequelize(undefined, undefined, undefined, {
-  dialect: 'sqlite',
-  storage: './data/db.sqlite',
-  operatorsAliases: false
-});
+var sequelize = null;
+if (process.env.ENV === 'local') {
+  sequelize = new Sequelize(
+    process.env.db_name,
+    "mybarre_backend",
+    "mybarre-x-sawatechnologies-2020", {
+      dialect: 'sqlite',
+      storage: './data/db.sqlite',
+      operatorsAliases: false
+    });
+} else {
+  sequelize = new Sequelize(
+    process.env.db_name,
+    "mybarre_backend",
+    "mybarre-x-sawatechnologies-2020", {
+      host: 'mybarrefitness.mysql.rds.aliyuncs.com',
+      dialect: 'mysql',
+      port: 33333,
+    });
+}
+
 
 var db = {};
 
@@ -29,7 +45,7 @@ const user_bundles = sequelize.define('user_bundles', {
     type: Sequelize.STRING
   },
   price: {
-    type: Sequelize.NUMBER
+    type: Sequelize.INTEGER
   },
 });
 db.user_bundles = user_bundles;

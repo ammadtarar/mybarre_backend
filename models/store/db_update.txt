@@ -1,0 +1,5 @@
+Table : Order  
+remarks: {
+	type: DataTypes.STRING,
+	allowNull: true
+}

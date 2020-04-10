@@ -158,11 +158,17 @@ module.exports = function(app, middleware, db, underscore, responseController,
 			})
 	});
 
+
+
 	app.get('/user/my/membership', middleware.requireAuthentication,
 		function(req,
 			res) {
 
 			db.membership.findOne({
+					limit: 1,
+					order: [
+						['createdAt', 'DESC']
+					],
 					where: {
 						userId: req.user.id
 					},
@@ -201,6 +207,9 @@ module.exports = function(app, middleware, db, underscore, responseController,
 					where: {
 						userId: id
 					},
+					order: [
+						['createdAt', 'DESC']
+					],
 					attributes: {
 						exclude: ['courseId', 'userId']
 					},

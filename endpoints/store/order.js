@@ -14,8 +14,7 @@ module.exports = function(app, middleware, db, underscore, responseController) {
 	app.post('/order/create', middleware.requireAuthentication, function(req,
 		res) {
 		var body = underscore.pick(req.body, 'reciepient_name', 'phone',
-			'address',
-			'city', 'zip_code', 'amount');
+			'address', 'city', 'zip_code', 'amount', 'remarks');
 		if (body === null || body === undefined || isEmpty(body)) {
 			responseController.fail(res, 403,
 				"Please include order params in request body"

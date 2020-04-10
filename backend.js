@@ -1,4 +1,43 @@
 //IMPORT ALL REQURIED MODULES
+const PORT = process.env.PORT || 3001;
+const force = process.env.force || false;
+
+const enviorment = process.env.ENV || null;
+if (enviorment === null) {
+	console.log('\x1b[40m\x1b[31m',
+		"Please provde ENV argument. ENV can be LOCAL , STAGING or PRODUCTION. For example : ENV=STAGING npm start"
+	)
+	return
+} else if (enviorment.toLowerCase() === 'local') {
+	process.env.base_url = "http://localhost:" + PORT;
+	process.env.db_name = "local";
+} else if (enviorment.toLowerCase() === 'staging') {
+	process.env.base_url = "https://api-staging.mybarrefitness.com";
+	process.env.db_name = "staging";
+	if (force) {
+		console.log('\x1b[40m\x1b[31m',
+			"CANNOT RESET DATA ON STAGING SERVER. ONLY LOCAL DATA CAN BE ERASED"
+		)
+		return
+	}
+} else if (enviorment.toLowerCase() === 'production') {
+	process.env.base_url = "https://api.mybarrefitness.com";
+	process.env.db_name = "production";
+	// if (force) {
+	// 	console.log('\x1b[40m\x1b[31m',
+	// 		"CANNOT RESET DATA ON PRODUCTION SERVER. ONLY LOCAL DATA CAN BE ERASED"
+	// 	)
+	// 	return
+	// }
+} else {
+	console.log('\x1b[40m\x1b[31m',
+		"Please provde a valid ENV argument. ENV can be LOCAL , STAGING or PRODUCTION. For example : ENV=STAGING npm start"
+	)
+	return
+}
+
+
+
 const express = require('express');
 const bodyParser = require('body-parser');
 const _ = require('underscore');
@@ -9,7 +48,7 @@ const responseController = require('./controllers/responseController.js');
 
 
 const app = express();
-const PORT = process.env.PORT || 3001;
+
 
 app.use(function(req, res, next) {
 	res.header("Access-Control-Allow-Origin", "*");
@@ -49,16 +88,6 @@ require('./endpoints/store/order.js')(app, middleware, db, _,
 	responseController);
 
 
-var force = process.env.force || false;
-const env = process.env.env;
-
-if (force && (env !== null && env !== undefined && env === "production")) {
-	force = false;
-	throw console.error(
-		"CANNOT RESET DATA ON PRODUCTION SERVER. ONLY STAGING DATA CAN BE ERASED");
-}
-
-
 
 //INIT DB AND EXPRESS
 db.sequelize.sync({
@@ -66,20 +95,16 @@ db.sequelize.sync({
 }).then(function() {
 	app.listen(PORT, function() {
 		console.log('Express listening on PORT ' + PORT + ' ! ');
-
+		require('./controllers/emailScheduler.js')(db);
 		if (force) {
-			const body = {
+			const adminJson = {
 				"name": "Root",
 				"email": "root@mybarre.com",
 				"password": "root@mybarre",
 				"type": "root"
 			};
-			db.admin.create(body)
+			db.admin.create(adminJson)
 				.then(function(admin) {
-					console.log("======= ROOT ADMIN =========");
-					console.log(body);
-					console.log("===========================");
-
 					db.bundle.create({
 							name: 'Training',
 							description: 'This is the original training bundle',
@@ -87,6 +112,9 @@ db.sequelize.sync({
 							type: 'training'
 						})
 						.then(function(bundle) {
+							console.log("======= ROOT ADMIN =========");
+							console.log(adminJson);
+							console.log("===========================");
 							console.log();
 							console.log("======= TRAINING BUNDLE =========");
 							console.log(bundle.toJSON());

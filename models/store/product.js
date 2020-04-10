@@ -10,11 +10,11 @@ module.exports = function(sequelize, DataTypes) {
 			unique: false
 		},
 		price: {
-			type: DataTypes.NUMBER,
+			type: DataTypes.FLOAT,
 			defaultValue: 0.00
 		},
 		count: {
-			type: DataTypes.NUMBER,
+			type: DataTypes.INTEGER,
 			defaultValue: 0
 		},
 		thumbnail_url: {
