@@ -179,6 +179,9 @@ module.exports = async function(app, middleware, db, underscore,
 						db.membership.findAll({
 								attributes: [
 									[db.sequelize.fn('sum', db.sequelize.col('price')), 'total'],
+									[db.sequelize.fn('sum', db.sequelize.col('license_fee')),
+										'total_license'
+									],
 								]
 							})
 							.then(function(users) {
@@ -186,8 +189,15 @@ module.exports = async function(app, middleware, db, underscore,
 									0) * 100) / 100).toFixed(
 									2);
 
+								const licenseRevenue = (Math.round((users[0].dataValues.total_license ||
+									0) * 100) / 100).toFixed(
+									2);
+
+
+
 								responseController.success(res, 200, {
 									membership: membershipsRevenue,
+									license: licenseRevenue,
 									store: storeRevenue,
 									bundles: bundlesRevenue
 								})

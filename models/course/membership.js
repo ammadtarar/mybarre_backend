@@ -24,6 +24,17 @@ module.exports = function(sequelize, DataTypes) {
 			type: DataTypes.STRING,
 			allowNull: true
 		},
+		last_notification_date: {
+			type: DataTypes.DATE,
+			allowNull: true,
+			get() {
+				const original = this.getDataValue('last_notification_date');
+				if (original === null) {
+					return this.getDataValue('video_submission_date');
+				}
+				return original;
+			}
+		},
 		status: {
 			type: DataTypes.ENUM,
 			values: [
@@ -42,6 +53,11 @@ module.exports = function(sequelize, DataTypes) {
 			type: DataTypes.STRING,
 			allowNull: true
 		},
+		license_fee: {
+			type: DataTypes.FLOAT,
+			allowNull: true,
+			defaultValue: 0.00
+		},
 		certificate_url: {
 			type: DataTypes.STRING
 		},
@@ -51,7 +67,6 @@ module.exports = function(sequelize, DataTypes) {
 			get() {
 				const ori = this.getDataValue('video_submission_date') || null;
 				if (ori === null) {
-					console.log(JSON.stringify(this.getDataValue('course')));
 					const course = this.getDataValue('course') || undefined;
 					if (course === undefined) {
 						return ""

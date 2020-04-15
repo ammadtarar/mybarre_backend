@@ -372,20 +372,39 @@ module.exports = function(app, middleware, db, underscore, responseController,
 					"Please provide a license out_trade_no in request body");
 				return;
 			}
-			db.membership.update({
-					license_out_trade_no: out_trade_no,
-					status: 'license-fee-paid'
-				}, {
+
+			db.membership.findOne({
 					where: {
-						id: id
-					}
+						userId: id
+					},
+					include: [{
+						model: db.course,
+						as: 'course'
+					}]
 				})
-				.then(function(response) {
-					responseController.success(res, 200, 'Membership updated');
+				.then(function(mbrshp) {
+					const price = mbrshp.course.price || 0;
+
+					db.membership.update({
+							license_out_trade_no: out_trade_no,
+							status: 'license-fee-paid',
+							license_fee: price
+						}, {
+							where: {
+								id: id
+							}
+						})
+						.then(function(response) {
+							responseController.success(res, 200, 'Membership updated');
+						})
+						.catch(function(updateErr) {
+							responseController.fail(res, 403, String(updateErr));
+						});
+
 				})
-				.catch(function(updateErr) {
-					responseController.fail(res, 403, String(updateErr));
-				});
+
+
+
 		});
 
 

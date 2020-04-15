@@ -18,6 +18,7 @@ if (process.env.ENV === 'local') {
       host: 'mybarrefitness.mysql.rds.aliyuncs.com',
       dialect: 'mysql',
       port: 33333,
+      logging: true
     });
 }
 
@@ -100,5 +101,7 @@ db.order.hasMany(db.order_items, {
   as: 'items'
 });
 
+
+db.configs = sequelize.import('../models/configs.js')
 
 module.exports = db;

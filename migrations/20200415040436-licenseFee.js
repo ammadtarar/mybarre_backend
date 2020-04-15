@@ -8,24 +8,18 @@ module.exports = {
 
       Example:
       return queryInterface.createTable('users', { id: Sequelize.INTEGER });
-    */
-
+    // */
     // return Promise.all([
     //   queryInterface.addColumn(
-    //     'user_bundles',
-    //     'out_trade_no',
-    //     Sequelize.STRING
-    //   ),
-    //   queryInterface.addColumn(
-    //     'user_bundles',
-    //     'price',
-    //     Sequelize.INTEGER
+    //     'memberships',
+    //     'license_fee',
+    //     Sequelize.FLOAT
     //   )
     // ]);
   },
 
   down: (queryInterface, Sequelize) => {
-    /*
+    /*zss
       Add reverting commands here.
       Return a promise to correctly handle asynchronicity.
 

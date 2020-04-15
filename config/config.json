@@ -7,13 +7,13 @@
     "dialect": "sqlite",
     "storage": "./data/db.sqlite"
   },
-  "test": {
-    "username": "root",
-    "password": null,
-    "database": "database_test",
-    "host": "127.0.0.1",
+  "staging": {
+    "username": "mybarre_backend",
+    "password": "mybarre-x-sawatechnologies-2020",
+    "database": "staging",
+    "host": "mybarrefitness.mysql.rds.aliyuncs.com",
     "dialect": "mysql",
-    "operatorsAliases": false
+    "port": 33333
   },
   "production": {
     "username": "root",

@@ -70,7 +70,7 @@ require('./endpoints/user.js')(app, middleware, db, _, responseController);
 require('./endpoints/files.js')(app, db, __dirname, middleware,
 	responseController);
 require('./endpoints/bundle.js')(app, middleware, db, _, responseController);
-
+require('./endpoints/configs.js')(app, middleware, db, _, responseController);
 //COURSE
 require('./endpoints/course/course.js')(app, middleware, db, _,
 	responseController);
@@ -94,8 +94,23 @@ db.sequelize.sync({
 	force: force
 }).then(function() {
 	app.listen(PORT, function() {
+		console.log();
+		console.log();
+		console.log();
 		console.log('Express listening on PORT ' + PORT + ' ! ');
+		console.log();
+		console.log();
+		console.log();
 		require('./controllers/emailScheduler.js')(db);
+
+		db.configs.findAll()
+			.then(function(configs) {
+				console.log("EXISTING CONFIGS LENGTH = ", configs.length);
+				if (configs.length < 1) {
+					console.log("CREATING CONFIGS");
+					db.configs.create()
+				}
+			})
 		if (force) {
 			const adminJson = {
 				"name": "Root",
@@ -121,16 +136,14 @@ db.sequelize.sync({
 							console.log("===========================");
 						})
 
+
+
 				})
 				.catch(function(e) {
 					console.log({
 						"message": e.errors[0].message
 					});
-
-
-
 				});
-
 		}
 	});
 });
