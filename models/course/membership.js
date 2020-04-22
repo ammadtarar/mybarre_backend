@@ -61,6 +61,23 @@ module.exports = function(sequelize, DataTypes) {
 		certificate_url: {
 			type: DataTypes.STRING
 		},
+		license_creation_date: {
+			type: DataTypes.DATE,
+			allowNull: true,
+			get() {
+				const ori = this.getDataValue('license_creation_date') || null;
+				if (ori === null) {
+					return "";
+				} else {
+					var year = ori.getFullYear();
+					var month = ori.getMonth();
+					var day = ori.getDate();
+					var c = new Date(year + 1, month, day);
+					return moment(ori).format('YYYY/MM/DD') - moment(c).format(
+						'YYYY/MM/DD');
+				}
+			}
+		},
 		video_submission_date: {
 			type: DataTypes.DATE,
 			allowNull: true,

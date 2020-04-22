@@ -18,6 +18,10 @@ module.exports = function(sequelize, DataTypes) {
 			type: DataTypes.STRING,
 			allowNull: false
 		},
+		address_cn: {
+			type: DataTypes.STRING,
+			allowNull: false
+		},
 		city: {
 			type: DataTypes.STRING,
 			allowNull: true

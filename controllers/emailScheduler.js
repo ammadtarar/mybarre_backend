@@ -46,7 +46,9 @@ module.exports = async function(db) {
 							include: [{
 								model: db.user,
 								as: 'user',
-								attributes: ['id', 'name', 'gender', 'email']
+								attributes: ['id', 'name', 'gender', 'email',
+									'preffered_language'
+								]
 							}]
 						})
 						.then(function(membership) {
@@ -77,8 +79,8 @@ module.exports = async function(db) {
 	const rule = new schedule.RecurrenceRule();
 	rule.dayOfWeek = [0, new schedule.Range(0, 6)]; // EVERYDAY
 	rule.hour = 10; // AT 10 AM
-	rule.minute = 0;
-	rule.second = 0;
+	rule.minute = 1;
+	rule.second = 1;
 
 	schedule.scheduleJob(rule, async function() {
 		console.log();

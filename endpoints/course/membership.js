@@ -483,6 +483,15 @@ module.exports = function(app, middleware, db, underscore, responseController,
 				})
 				.then(function(updateStatus) {
 					responseController.success(res, 200, "Membership status updated");
+					if (status === "licensed-instructor") {
+						db.membership.update({
+							license_creation_date: new Date()
+						}, {
+							where: {
+								id: id
+							}
+						})
+					}
 				})
 				.catch(function(updateErr) {
 					responseController.fail(res, 403, updateErr);
