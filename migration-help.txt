@@ -1,0 +1,17 @@
+STEP 1 - First create migrations file by following command :
+
+npx sequelize migration:create --name file-name
+
+STEP 2 - Add the following promise block in up object to create new field in a table
+
+return Promise.all([
+  queryInterface.addColumn(
+     'memberships',
+      'license_fee',
+     Sequelize.FLOAT
+   )
+ ]);
+
+STEP - 3 : run following cmd 
+
+sequelize db:migrate

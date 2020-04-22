@@ -13,10 +13,10 @@ module.exports = function(app, middleware, db, underscore, responseController) {
 	app.post('/course/create', middleware.requireAdminAuthentication, function(
 		req, res) {
 		var body = underscore.pick(req.body, 'name', 'start', 'end', 'price',
-			'seats');
-		if (isEmpty(body) || body.length < 4) {
+			'seats', 'license_fee');
+		if (isEmpty(body) || body.length < 6) {
 			responseController.fail(res, 403,
-				"Please provide course name , start , end , seats and price in reqest body"
+				"Please provide course name , start , end , seats , price and licnese_fee in reqest body"
 			);
 			return;
 		}
@@ -178,10 +178,10 @@ module.exports = function(app, middleware, db, underscore, responseController) {
 			return;
 		}
 		var body = underscore.pick(req.body, 'name', 'start', 'end', 'price',
-			'seats');
+			'seats', 'license_fee');
 		if (isEmpty(body)) {
 			responseController.fail(res, 403,
-				"Please provide course name , start , end , seats and price in reqest body"
+				"Please provide course name , start , end , seats , price & license_fee in reqest body"
 			);
 			return;
 		}

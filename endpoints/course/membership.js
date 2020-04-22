@@ -383,7 +383,7 @@ module.exports = function(app, middleware, db, underscore, responseController,
 					}]
 				})
 				.then(function(mbrshp) {
-					const price = mbrshp.course.price || 0;
+					const price = mbrshp.course.license_fee || 0;
 
 					db.membership.update({
 							license_out_trade_no: out_trade_no,
