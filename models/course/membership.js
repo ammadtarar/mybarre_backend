@@ -73,7 +73,7 @@ module.exports = function(sequelize, DataTypes) {
 					var month = ori.getMonth();
 					var day = ori.getDate();
 					var c = new Date(year + 1, month, day);
-					return moment(ori).format('YYYY/MM/DD') - moment(c).format(
+					return moment(ori).format('YYYY/MM/DD') + " - " + moment(c).format(
 						'YYYY/MM/DD');
 				}
 			}

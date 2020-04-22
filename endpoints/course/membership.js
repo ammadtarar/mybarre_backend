@@ -485,12 +485,20 @@ module.exports = function(app, middleware, db, underscore, responseController,
 					responseController.success(res, 200, "Membership status updated");
 					if (status === "licensed-instructor") {
 						db.membership.update({
-							license_creation_date: new Date()
-						}, {
-							where: {
-								id: id
-							}
-						})
+								license_creation_date: new Date()
+							}, {
+								where: {
+									id: id
+								}
+							})
+							.then(function(upstat) {
+								console.log("updated license creation date");
+								console.log(upstat);
+							})
+							.catch(function(e) {
+								console.log("update license creation date error");
+								console.log(e);
+							})
 					}
 				})
 				.catch(function(updateErr) {
