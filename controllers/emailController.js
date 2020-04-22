@@ -248,6 +248,101 @@ var cn = '<html>' +
 	' </body>    ' +
 	'</html>';
 
+var adminHtml = '<html>' +
+	'' +
+	'    <style>' +
+	'        ' +
+	'        *{' +
+	'' +
+	'        }' +
+	'        ' +
+	'        img{' +
+	'            width : 70px;' +
+	'        }' +
+	'        ' +
+	'        .main{' +
+	'            display: flex;' +
+	'            flex-direction: column;' +
+	'            padding: 10px;' +
+	'            height: 100vh;' +
+	'        }' +
+	'        ' +
+	'        label{' +
+	'            font-family: \'Verdana\';' +
+	'            width : 100% ; ' +
+	'            float : left ;' +
+	'            text-align: left;' +
+	'        }' +
+	'        ' +
+	'        .b{' +
+	'            color: #0F253B;' +
+	'        }' +
+	'        ' +
+	'        .copyright{' +
+	'            margin-top: 20px;' +
+	'  			font-size: 16px;' +
+	'  			font-weight: 600;' +
+	'  			' +
+	'  			font-family: monospace;' +
+	'        }' +
+	'        ' +
+	'        .vertical_space {' +
+	'            margin-top : 20px ; ' +
+	'        }' +
+	'        ' +
+	'        .line{' +
+	'            width: 100%;' +
+	'            height: 1px;' +
+	'            background: gray;' +
+	'            margin-top: 20px;' +
+	'            margin-bottom: 20px;' +
+	'        }' +
+	'        ' +
+	'' +
+	'    </style>' +
+	'    ' +
+	'    ' +
+	'    ' +
+	'    <body style="margin: 0px !important ;background:white">' +
+	'        <div class="main">' +
+	'        ' +
+	'            <img src="https://uploads.wework.cn/dfdb0a41-b833-44e5-b765-09d361bcb124" >' +
+	'            <label class="vertical_space">' +
+	'                You have been made administrator for <b>MYBarre</b>. Please refer to credentials below to login to the administrator dashboard.' +
+	'            </label>' +
+	'            <label class="vertical_space">' +
+	'                Please refer to credentials below to login' +
+	'            </label>' +
+	'            <label class="vertical_space">' +
+	'                Email : <br><b>%email</b>' +
+	'            </label>' +
+	'            <label class="vertical_space">' +
+	'                Password : <br><b>%pwd</b>' +
+	'            </label>' +
+	'            <label class="vertical_space">' +
+	'                Dashboard URL : <br><b>%url</b>' +
+	'            </label>' +
+	'            <label class="vertical_space">' +
+	'                Please keep these credentials safe and DO NOT share with anyone else. In case of any issues, please contact us at: <b>inf@mybarrefitness.com</b>' +
+	'            </label>' +
+	'            <label class="copyright">' +
+	'                © 2020 Ladies Who Tech. All rights reserved.' +
+	'            </label>' +
+	'            ' +
+	'        </div>' +
+	'    ' +
+	'    ' +
+	'    </body>' +
+	'    ' +
+	'    ' +
+	'    ' +
+	'    ' +
+	'    ' +
+	'    ' +
+	'' +
+	'' +
+	'</html>';
+
 
 
 let transporter = nodemailer.createTransport({
@@ -299,4 +394,30 @@ async function sendVideoSubmissionEmail(membership) {
 	});
 };
 
+async function sendAdminCreationEmail(admin) {
+	var body = adminHtml;
+	body = body.replaceAll("%email", admin.email);
+	body = body.replaceAll("%pwd", admin.password);
+	body = body.replaceAll("%url", process.env.admin_url);
+	let info = transporter.sendMail({
+		from: '"MYBarre" <info@mybarre.com>',
+		to: admin.email,
+		subject: "Your MYBarre admin credentials",
+		html: body
+	});
+	const msgId = info.messageId || -1;
+	new Promise(function(resolve, reject) {
+		if (msgId === -1) {
+			console.log();
+			console.log("NODE MAILER ERROR");
+			console.log(info);
+			console.log();
+			reject(info);
+		} else {
+			resolve();
+		}
+	});
+};
+
+module.exports.sendAdminCreationEmail = sendAdminCreationEmail;
 module.exports.sendVideoSubmissionEmail = sendVideoSubmissionEmail;

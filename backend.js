@@ -14,6 +14,7 @@ if (enviorment === null) {
 } else if (enviorment.toLowerCase() === 'staging') {
 	process.env.base_url = "https://api-staging.mybarrefitness.com";
 	process.env.db_name = "staging";
+	process.env.admin_url = "https://dashboard-staging.mybarrefitness.com";
 	if (force) {
 		console.log('\x1b[40m\x1b[31m',
 			"CANNOT RESET DATA ON STAGING SERVER. ONLY LOCAL DATA CAN BE ERASED"
@@ -23,6 +24,7 @@ if (enviorment === null) {
 } else if (enviorment.toLowerCase() === 'production') {
 	process.env.base_url = "https://api.mybarrefitness.com";
 	process.env.db_name = "production";
+	process.env.admin_url = "https://dashboard.mybarrefitness.com";
 	if (force) {
 		console.log('\x1b[40m\x1b[31m',
 			"CANNOT RESET DATA ON PRODUCTION SERVER. ONLY LOCAL DATA CAN BE ERASED"
