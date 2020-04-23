@@ -26,7 +26,7 @@ module.exports = function(sequelize, DataTypes) {
         type: DataTypes.STRING
       },
       gender: {
-        type: DataTypes.INTEGER
+        type: DataTypes.STRING
       },
       session_key: {
         type: DataTypes.STRING,
