@@ -15,12 +15,12 @@ if (enviorment === null) {
 	process.env.base_url = "https://api-staging.mybarrefitness.com";
 	process.env.db_name = "staging";
 	process.env.admin_url = "https://dashboard-staging.mybarrefitness.com";
-	if (force) {
-		console.log('\x1b[40m\x1b[31m',
-			"CANNOT RESET DATA ON STAGING SERVER. ONLY LOCAL DATA CAN BE ERASED"
-		)
-		return
-	}
+	// if (force) {
+	// 	console.log('\x1b[40m\x1b[31m',
+	// 		"CANNOT RESET DATA ON STAGING SERVER. ONLY LOCAL DATA CAN BE ERASED"
+	// 	)
+	// 	return
+	// }
 } else if (enviorment.toLowerCase() === 'production') {
 	process.env.base_url = "https://api.mybarrefitness.com";
 	process.env.db_name = "production";
@@ -50,7 +50,7 @@ const responseController = require('./controllers/responseController.js');
 
 
 const app = express();
-
+const json2xls = require('json2xls');
 
 app.use(function(req, res, next) {
 	res.header("Access-Control-Allow-Origin", "*");
@@ -65,6 +65,7 @@ app.use(function(req, res, next) {
 app.use(bodyParser.json());
 app.use(middleware.logger);
 app.use(express.urlencoded());
+app.use(json2xls.middleware);
 
 require('./endpoints/dashboard.js')(app, middleware, db, _, responseController);
 require('./endpoints/admin.js')(app, middleware, db, _, responseController);
@@ -87,6 +88,9 @@ require('./endpoints/store/product.js')(app, middleware, db, _,
 	responseController);
 require('./endpoints/store/cart.js')(app, middleware, db, _, responseController);
 require('./endpoints/store/order.js')(app, middleware, db, _,
+	responseController);
+
+require('./endpoints/coupons.js')(app, middleware, db, _,
 	responseController);
 
 

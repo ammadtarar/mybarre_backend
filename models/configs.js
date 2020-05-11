@@ -9,6 +9,11 @@ module.exports = function(sequelize, DataTypes) {
 			type: DataTypes.INTEGER,
 			allowNull: true,
 			defaultValue: 5
+		},
+		manual_fee: {
+			type: DataTypes.INTEGER,
+			allowNull: true,
+			defaultValue: 199
 		}
 	});
 };

@@ -7,16 +7,20 @@ function isEmpty(obj) {
 	return true;
 }
 
+const json2xls = require('json2xls');
+const fs = require('fs-extra');
+const diskDirectory = './disk';
+const path = require('path');
 
 module.exports = function(app, middleware, db, underscore, responseController) {
 
 	app.post('/course/create', middleware.requireAdminAuthentication, function(
 		req, res) {
 		var body = underscore.pick(req.body, 'name', 'start', 'end', 'price',
-			'seats', 'license_fee');
+			'seats', 'license_fee', 'venue', 'welcome_doc_url');
 		if (isEmpty(body) || body.length < 6) {
 			responseController.fail(res, 403,
-				"Please provide course name , start , end , seats , price and licnese_fee in reqest body"
+				"Please provide course name , start , end , seats , price , welcome_doc_url , venue and licnese_fee in reqest body"
 			);
 			return;
 		}
@@ -129,7 +133,10 @@ module.exports = function(app, middleware, db, underscore, responseController) {
 					as: 'memberships',
 					include: [{
 						model: db.user,
-						as: 'user'
+						as: 'user',
+						attributes: {
+							exclude: ['session_key', 'token', 'tokenHash', 'password']
+						}
 					}]
 				}],
 			})
@@ -141,6 +148,7 @@ module.exports = function(app, middleware, db, underscore, responseController) {
 				);
 			})
 			.catch(function(e) {
+				console.log(e);
 				responseController.fail(res, 406, e);
 			});
 	});
@@ -178,10 +186,10 @@ module.exports = function(app, middleware, db, underscore, responseController) {
 			return;
 		}
 		var body = underscore.pick(req.body, 'name', 'start', 'end', 'price',
-			'seats', 'license_fee');
+			'seats', 'license_fee', 'venue', 'welcome_doc_url');
 		if (isEmpty(body)) {
 			responseController.fail(res, 403,
-				"Please provide course name , start , end , seats , price & license_fee in reqest body"
+				"Please provide course name , start , end , seats , price ,venue, welcome_doc_url & license_fee in reqest body"
 			);
 			return;
 		}
@@ -203,6 +211,67 @@ module.exports = function(app, middleware, db, underscore, responseController) {
 
 	});
 
+	app.get('/course/:id/report', middleware.requireAdminAuthentication, function(
+		req, res) {
+
+		var id = parseInt(req.params.id);
+		if (id === undefined || id === null || id <= 0) {
+			responseController.fail(res, 403, "Please provide a valid course ID");
+			return;
+		}
+
+		db.course.findOne({
+				where: {
+					id: id
+				},
+				include: [{
+					model: db.membership,
+					as: 'memberships',
+					include: [{
+						model: db.user,
+						as: 'user',
+						attributes: {
+							exclude: ['session_key', 'token', 'tokenHash', 'password']
+						}
+					}]
+				}]
+			})
+			.then(function(course) {
+				if (course === null || course === undefined || isEmpty(course)) {
+					responseController.fail(res, 404,
+						"Course not found"
+					);
+					return
+				}
+
+				const memberships = course.memberships;
+				var jsonArray = [];
+
+				memberships.forEach(function(membership) {
+					var tempArry = {
+						'First Name': membership.user.first_name,
+						'Family Name ': membership.user.last_name,
+						'Nickname/English Name': membership.user.nickname,
+						'Gender': membership.user.gender,
+						'Email': membership.user.email,
+						'Phone': membership.user.phone,
+						'Wechat ID': membership.user.wechat_id,
+						'Training Status': membership.status.replaceAll("-", ' ').toUpperCase(),
+						'City': membership.user.city,
+						'Studio Name': membership.user.studio_name,
+						'Studio Manager Name': membership.user.studio_manager_name
+					}
+					jsonArray.push(tempArry);
+				});
+
+				jsonArray.sort(function(a, b) {
+					return parseFloat(b.ColoumnName4) - parseFloat(a.ColoumnName4);
+				});
+
+				res.xls('data.xlsx', jsonArray);
+			})
+
+	});
 
 
 };

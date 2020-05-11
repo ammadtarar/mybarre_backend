@@ -46,9 +46,7 @@ module.exports = async function(db) {
 							include: [{
 								model: db.user,
 								as: 'user',
-								attributes: ['id', 'name', 'gender', 'email',
-									'preffered_language'
-								]
+								attributes: ['id', 'name', 'gender', 'email']
 							}]
 						})
 						.then(function(membership) {

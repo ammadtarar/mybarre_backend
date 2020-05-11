@@ -10,7 +10,7 @@ function isEmpty(obj) {
 module.exports = async function(app, middleware, db, underscore,
 	responseController) {
 
-	app.get('/configs', middleware.requireAdminAuthentication, function(req, res) {
+	app.get('/configs', middleware.requireGlobalToken, function(req, res) {
 		db.configs.findOne({
 				where: {
 					id: 1

@@ -6,7 +6,23 @@ var jwt = require('jsonwebtoken');
 module.exports = function(sequelize, DataTypes) {
   const user = sequelize.define(
     "user", {
-      name: {
+      first_name: {
+        type: DataTypes.STRING,
+        allowNull: true
+      },
+      last_name: {
+        type: DataTypes.STRING,
+        allowNull: true
+      },
+      nickname: {
+        type: DataTypes.STRING,
+        allowNull: true
+      },
+      certificate_name: {
+        type: DataTypes.STRING,
+        allowNull: true
+      },
+      wechat_id: {
         type: DataTypes.STRING,
         allowNull: true
       },
@@ -21,6 +37,14 @@ module.exports = function(sequelize, DataTypes) {
         type: DataTypes.STRING,
         allowNull: true,
         unique: true
+      },
+      top_size: {
+        type: DataTypes.STRING,
+        defaultValue: true
+      },
+      sock_size: {
+        type: DataTypes.STRING,
+        allowNull: true
       },
       occupation: {
         type: DataTypes.STRING
@@ -44,7 +68,7 @@ module.exports = function(sequelize, DataTypes) {
       nationality: {
         type: DataTypes.STRING
       },
-      preffered_language: {
+      manual_lang: {
         type: DataTypes.STRING
       },
       address: {
@@ -210,8 +234,9 @@ module.exports = function(sequelize, DataTypes) {
   user.prototype.toPublicJSON = function() {
     var json = this.toJSON();
     return _.pick(json, 'id',
-      'createdAt', 'updatedAt', 'name',
-      'phone', 'avatar_url', 'open_id', 'email', 'gender');
+      'createdAt', 'updatedAt', 'first_name', 'last_name', 'nickname',
+      'certificate_name', 'wechat_id', 'phone', 'avatar_url', 'open_id',
+      'email', 'gender', 'manual_lang');
   };
 
   return user;

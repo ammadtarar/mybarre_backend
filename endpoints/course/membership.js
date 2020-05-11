@@ -114,10 +114,11 @@ module.exports = function(app, middleware, db, underscore, responseController,
 		req,
 		res) {
 
-		var body = underscore.pick(req.body, 'courseId', 'out_trade_no');
-		if (isEmpty(body) || body.length < 2) {
+		var body = underscore.pick(req.body, 'courseId', 'out_trade_no', 'price',
+			'couponId');
+		if (isEmpty(body)) {
 			responseController.fail(res, 403,
-				"Please provide courseId and wechat payment out_trade_no in reqest body"
+				"Please provide courseId , out_trade_no(optional) , price , couponId(optional) in request body"
 			);
 			return;
 		}
@@ -139,14 +140,30 @@ module.exports = function(app, middleware, db, underscore, responseController,
 				db.membership.create({
 						start: new Date(),
 						end: oneYearFromNow,
-						price: course.price,
+						price: body.price,
 						out_trade_no: body.out_trade_no,
 						status: "pre-instructor",
 						userId: req.user.id,
-						courseId: course.id
+						courseId: course.id,
+						couponId: body.couponId
 					})
 					.then(function(membership) {
 						responseController.success(res, 200, membership);
+
+						if (body.couponId) {
+							db.user_coupons.create({
+									couponId: body.couponId,
+									userId: req.user.id
+								})
+								.then(function(couponresponse) {
+									console.log("USER COUPON RECORD RESULT");
+									console.log(couponresponse);
+								})
+								.catch(function(couponErr) {
+									console.log("USER COUPON RECORD ERROR");
+									console.log(couponErr);
+								})
+						}
 					})
 					.catch(function(membershipError) {
 						responseController.fail(res, 406, membershipError);
@@ -260,6 +277,10 @@ module.exports = function(app, middleware, db, underscore, responseController,
 						attributes: {
 							exclude: ['bundleId', 'membershipId', 'updatedAt']
 						}
+					}, {
+						model: db.coupons,
+						as: 'coupon'
+
 					}]
 				})
 				.then(function(membership) {

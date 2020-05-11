@@ -10,9 +10,9 @@ module.exports = {
       return queryInterface.createTable('users', { id: Sequelize.INTEGER });
     */
     return Promise.all([
-      queryInterface.changeColumn(
+      queryInterface.addColumn(
         'users',
-        'gender',
+        'wechat_id',
         Sequelize.STRING
       )
     ]);

@@ -9,7 +9,7 @@ function isEmpty(obj) {
 
 module.exports = function(app, middleware, db, underscore, responseController) {
 
-	app.get('/store/products/list/all', middleware.requireGlobalToken, function(
+	app.get('/store/products/list/all', middleware.requireGlobalToken, async function(
 		req, res) {
 		var limit = parseInt(req.query.limit) || 10;
 		var page = parseInt(req.query.page) || 0;
@@ -41,13 +41,44 @@ module.exports = function(app, middleware, db, underscore, responseController) {
 				[db.Sequelize.Op.and]: fullQuery
 			}
 		}
+
+		if (req.query.status) {
+			where.status = req.query.status;
+		}
+
+		console.log();
+		console.log();
+		console.log();
+		console.log(where);
+		console.log();
+		console.log();
+		console.log();
 		db.product.findAndCountAll({
 				where: where,
 				limit: limit,
 				offset: limit * page,
 				order: [
 					['createdAt', 'DESC']
-				]
+				],
+				include: [{
+					model: db.color,
+					as: 'colors',
+					attributes: {
+						exclude: ['createdAt', 'updatedAt']
+					},
+					through: {
+						attributes: []
+					}
+				}, {
+					model: db.size,
+					as: 'sizes',
+					attributes: {
+						exclude: ['createdAt', 'updatedAt']
+					},
+					through: {
+						attributes: []
+					}
+				}]
 			})
 			.then(function(products) {
 				responseController.success(
@@ -72,7 +103,26 @@ module.exports = function(app, middleware, db, underscore, responseController) {
 		db.product.findOne({
 				where: {
 					id: id
-				}
+				},
+				include: [{
+					model: db.color,
+					as: 'colors',
+					attributes: {
+						exclude: ['createdAt', 'updatedAt']
+					},
+					through: {
+						attributes: []
+					}
+				}, {
+					model: db.size,
+					as: 'sizes',
+					attributes: {
+						exclude: ['createdAt', 'updatedAt']
+					},
+					through: {
+						attributes: []
+					}
+				}]
 			})
 			.then(function(product) {
 				responseController.success(
@@ -87,27 +137,134 @@ module.exports = function(app, middleware, db, underscore, responseController) {
 	});
 
 	app.post('/store/product/create', middleware.requireAdminAuthentication,
-		function(req, res) {
+		async function(req, res) {
 			var body = underscore.pick(req.body, 'name', 'description', 'price',
-				'count', 'thumbnail_url');
+				'count', 'thumbnail_url', 'colors', 'sizes');
 			if (body === null || body === undefined || isEmpty(body)) {
 				responseController.fail(res, 403,
-					"Please send product's name , description , price , thumbnail_url and count in request body"
+					"Please send product's name , description , price , colors , sizes , thumbnail_url and count in request body"
 				);
 				return;
 			}
 			db.product.create(body)
-				.then(function(product) {
+				.then(async function(product) {
+
+					await addColorsToProduct(product.id, body.colors);
+					await addSizesToProduct(product.id, body.sizes)
+
 					responseController.success(res, 201, product);
 				})
 				.catch(function(e) {
+					console.log(e);
 					responseController.fail(res, 403, e);
 				})
 		});
 
+	async function addColorsToProduct(productId, colors) {
+		return new Promise(function(resolve, reject) {
+			if (productId < -1) {
+				reject();
+			}
+
+			if (colors === undefined || colors === null || colors.length < 1) {
+				reject();
+			}
+
+			var updated = [];
+			colors.forEach((item, i) => {
+				if (item.id === undefined || item.id < 1) {
+					updated.push({
+						name_en: item.name_en,
+						name_zh: item.name_zh
+					})
+				}
+			});
+
+
+
+			db.color.bulkCreate(updated, {
+					fields: ["name_en", "name_zh"],
+					updateOnDuplicate: ["name_en", "name_zh"]
+				})
+				.then(function(createdColors) {
+
+					var items = [];
+					createdColors.forEach((item, i) => {
+						items.push({
+							productId: productId,
+							colorId: item.id
+						});
+					});
+
+					db.product_colors.bulkCreate(items)
+						.then(function(createResponse) {
+							resolve(createResponse);
+						})
+						.catch(function(creationError) {
+							reject(creationError);
+						});
+
+				})
+				.catch(function(creationError) {
+					reject(creationError);
+				});
+
+		});
+	};
+
+	async function addSizesToProduct(productId, sizes) {
+		return new Promise(function(resolve, reject) {
+			if (productId < -1) {
+				reject();
+			}
+
+			if (sizes === undefined || sizes === null || sizes.length < 1) {
+				reject();
+			}
+
+			var updated = [];
+			sizes.forEach((item, i) => {
+				if (item.id === undefined || item.id < 1) {
+					updated.push({
+						name_en: item.name_en,
+						name_zh: item.name_zh
+					})
+				}
+			});
+
+
+			db.size.bulkCreate(updated, {
+					fields: ["name_en", "name_zh"],
+					updateOnDuplicate: ["name_en", "name_zh"]
+				})
+				.then(function(createdSizes) {
+
+					var items = [];
+					createdSizes.forEach((item, i) => {
+						items.push({
+							productId: productId,
+							sizeId: item.id
+						});
+					});
+
+					db.product_sizes.bulkCreate(items)
+						.then(function(creationReponse) {
+							resolve(creationReponse);
+						})
+						.catch(function(creationError) {
+							reject(creationError);
+						});
+
+				})
+				.catch(function(creationError) {
+					reject(creationError);
+				});
+
+		});
+	};
 
 	app.patch('/store/product/:id', middleware.requireAdminAuthentication,
-		function(
+		async function(
 			req, res) {
 			const id = parseInt(req.params.id) || -1;
 			if (id === -1) {
@@ -116,10 +273,10 @@ module.exports = function(app, middleware, db, underscore, responseController) {
 				return;
 			}
 			var body = underscore.pick(req.body, 'name', 'description', 'price',
-				'count', 'thumbnail_url');
+				'count', 'thumbnail_url', 'sizes', 'colors');
 			if (body === null || body === undefined || isEmpty(body)) {
 				responseController.fail(res, 403,
-					"Please send product's name , description , price , thumbnail_url and count in request body"
+					"Please send product's name , description , price , sizes , colors , thumbnail_url and count in request body"
 				);
 				return;
 			}
@@ -128,7 +285,12 @@ module.exports = function(app, middleware, db, underscore, responseController) {
 						id: id
 					}
 				})
-				.then(function(product) {
+				.then(async function(product) {
+
+
+					await addColorsToProduct(id, body.colors);
+					await addSizesToProduct(id, body.sizes)
+
 					if (product) {
 						responseController.success(res, 201, "Product update successfully");
 					} else {

@@ -214,7 +214,7 @@ module.exports = function(app, db, rootDir, middleware, responseController) {
 			})
 	});
 
-	app.patch('/file/:id/rename', middleware.requireAdminAuthentication, function(
+	app.patch('/file/:id', middleware.requireAdminAuthentication, function(
 		req, res) {
 		const id = parseInt(req.params.id) || -1;
 		if (id === -1) {
@@ -224,30 +224,21 @@ module.exports = function(app, db, rootDir, middleware, responseController) {
 		}
 		if (isEmpty(req.body)) {
 			responseController.fail(res, 406,
-				"Request body is empty. Please include 'name' field in the request body"
-			);
-			return;
-		}
-		const name = req.body.name;
-		if (name === null || name === undefined || name === "") {
-			responseController.fail(res, 406,
-				"Request body is empty. Please include 'name' field in the request body"
+				"Request body is empty. Please include 'name' and/or 'stages' field in the request body"
 			);
 			return;
 		}
 
-		db.files.update({
-				name: name
-			}, {
+		db.files.update(req.body, {
 				where: {
 					id: id
 				}
 			})
 			.then(function(result) {
 				if (result) {
-					responseController.success(res, 200, 'File name updated successfully');
+					responseController.success(res, 200, 'File updated successfully');
 				} else {
-					responseController.fail(res, 403, 'Failed to update file name');
+					responseController.fail(res, 403, 'Failed to update file ');
 				}
 			})
 			.catch(function(e) {
@@ -258,13 +249,18 @@ module.exports = function(app, db, rootDir, middleware, responseController) {
 
 	app.post('/file/upload', middleware.requireGlobalToken, function(req, res) {
 
+		console.log();
+		console.log();
+		console.log();
+		console.log();
 		console.log("PARAMS");
 		console.log(req.query);
 		console.log("BODY");
 		console.log(req.body);
-		console.log("HEADERS");
-		console.log(req.query);
-
+		console.log("STAGES");
+		// console.log(JSON.parse(req.query.stages));
+		console.log();
+		console.log();
 		var type = req.query.type || "";
 		if (type === "") {
 			responseController.fail(res, 444, {
@@ -353,13 +349,13 @@ module.exports = function(app, db, rootDir, middleware, responseController) {
 							tg.generateOneByPercentCb(50, {
 								size: '320x200'
 							}, (err, result) => {
-
 								db.files.create({
 										name: req.query.item_name,
 										mime: req.file.mimetype,
 										url: fullUrl,
 										thumb_url: makeDownloadUrl(req, result),
-										bundleId: bundleId
+										bundleId: bundleId,
+										stages: JSON.parse(req.query.stages) || []
 									})
 									.then(function(fileRes) {
 										res.json(fileRes)
@@ -375,7 +371,8 @@ module.exports = function(app, db, rootDir, middleware, responseController) {
 									mime: req.file.mimetype,
 									url: fullUrl,
 									thumb_url: '',
-									bundleId: bundleId
+									bundleId: bundleId,
+									stages: JSON.parse(req.query.stages) || []
 								})
 								.then(function(fileRes) {
 									res.json(fileRes)

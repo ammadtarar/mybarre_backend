@@ -10,7 +10,7 @@ function isEmpty(obj) {
 module.exports = function(app, middleware, db, underscore, responseController) {
 
 
-	app.post('/user/cart/add/product/:id', middleware.requireAuthentication,
+	app.post('/user/cart/add/product/:id/:colorId/:sizeId', middleware.requireAuthentication,
 		function(req, res) {
 			const id = parseInt(req.params.id) || -1;
 			if (id === -1) {
@@ -19,6 +19,9 @@ module.exports = function(app, middleware, db, underscore, responseController) {
 				);
 				return;
 			}
+
+
+
 			db.product.findOne({
 					where: {
 						id: id
@@ -38,19 +41,46 @@ module.exports = function(app, middleware, db, underscore, responseController) {
 						return;
 					}
 
+
+					var where = {
+						productId: id,
+						userId: req.user.id
+					}
+
+					const sizeId = parseInt(req.params.sizeId) || -1;
+					if (sizeId != -1) {
+						where.sizeId = sizeId;
+					}
+
+					const colorId = parseInt(req.params.colorId) || -1;
+					if (colorId != -1) {
+						where.colorId = colorId
+					}
+
 					db.cart_items.findOne({
-							where: {
-								productId: id,
-								userId: req.user.id
-							}
+							where: where
 						})
 						.then(function(existing) {
 							if (existing === null || existing === undefined) {
-								db.cart_items.create({
-										productId: id,
-										userId: req.user.id,
-										count: 1
-									})
+
+								var cartItem = {
+									productId: id,
+									userId: req.user.id,
+									count: 1
+								};
+
+								const sizeId = parseInt(req.params.sizeId) || -1;
+								if (sizeId != -1) {
+									cartItem.sizeId = sizeId;
+								}
+
+								const colorId = parseInt(req.params.colorId) || -1;
+								if (colorId != -1) {
+									cartItem.colorId = colorId
+								}
+
+
+								db.cart_items.create(cartItem)
 									.then(function(cart) {
 										responseController.success(res, 200, "Product added to the cart");
 									})
@@ -59,27 +89,34 @@ module.exports = function(app, middleware, db, underscore, responseController) {
 									});
 							} else {
 								var count = existing.count;
-								console.log();
-								console.log();
-								console.log();
-								console.log("Existing count :  %s", count);
-								console.log("Product count :  %s", product.count);
-								console.log();
-								console.log();
-								console.log();
+
 								if (product.count <= count) {
 									responseController.fail(res, 411,
 										"No more of this item is available"
 									);
 									return
 								}
+
+
+								var updateWhere = {
+									productId: id,
+									userId: req.user.id,
+								};
+
+								const sizeId = parseInt(req.params.sizeId) || -1;
+								if (sizeId != -1) {
+									updateWhere.sizeId = sizeId;
+								}
+
+								const colorId = parseInt(req.params.colorId) || -1;
+								if (colorId != -1) {
+									updateWhere.colorId = colorId
+								}
+
 								db.cart_items.update({
 										count: count + 1
 									}, {
-										where: {
-											productId: id,
-											userId: req.user.id,
-										}
+										where: updateWhere
 									})
 									.then(function(cart) {
 										responseController.success(res, 200, "Cart updated successfully");
@@ -116,7 +153,7 @@ module.exports = function(app, middleware, db, underscore, responseController) {
 			})
 	});
 
-	app.post('/user/cart/reduct/product/:id', middleware.requireAuthentication,
+	app.post('/user/cart/reduct/product/:id/:colorId/:sizeId', middleware.requireAuthentication,
 		function(req, res) {
 			const id = parseInt(req.params.id) || -1;
 			if (id === -1) {
@@ -125,10 +162,24 @@ module.exports = function(app, middleware, db, underscore, responseController) {
 				);
 				return;
 			}
+
+
+			var where = {
+				productId: id
+			};
+
+			const sizeId = parseInt(req.params.sizeId) || -1;
+			if (sizeId != -1) {
+				where.sizeId = sizeId;
+			}
+
+			const colorId = parseInt(req.params.colorId) || -1;
+			if (colorId != -1) {
+				where.colorId = colorId
+			}
+
 			db.cart_items.findOne({
-					where: {
-						productId: id
-					}
+					where: where
 				})
 				.then(function(cart_item) {
 					if (cart_item === null || cart_item === undefined) {
@@ -139,24 +190,52 @@ module.exports = function(app, middleware, db, underscore, responseController) {
 					}
 					var count = cart_item.count;
 					if (count <= 1) {
+
+						var deleteWhere = {
+							userId: req.user.id,
+							productId: id
+						};
+
+						const sizeId = parseInt(req.params.sizeId) || -1;
+						if (sizeId != -1) {
+							deleteWhere.sizeId = sizeId;
+						}
+
+						const colorId = parseInt(req.params.colorId) || -1;
+						if (colorId != -1) {
+							deleteWhere.colorId = colorId
+						}
+
 						db.cart_items.destroy({
-								where: {
-									userId: req.user.id,
-									productId: id
-								}
+								where: deleteWhere
 							})
 							.then(function(up) {
 								responseController.success(res, 200,
 									"Product removed from the cart.")
 							})
 					} else {
+
+
+
+						var uppdateWhere = {
+							userId: req.user.id,
+							productId: id
+						};
+
+						const sizeId = parseInt(req.params.sizeId) || -1;
+						if (sizeId != -1) {
+							uppdateWhere.sizeId = sizeId;
+						}
+
+						const colorId = parseInt(req.params.colorId) || -1;
+						if (colorId != -1) {
+							uppdateWhere.colorId = colorId
+						}
+
 						db.cart_items.update({
 								count: count - 1
 							}, {
-								where: {
-									userId: req.user.id,
-									productId: id
-								}
+								where: updateWhere
 							})
 							.then(function(up) {
 								responseController.success(res, 200, "Cart updated.")

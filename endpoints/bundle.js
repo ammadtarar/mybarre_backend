@@ -15,24 +15,60 @@ const path = require('path');
 module.exports = function(app, middleware, db, underscore, responseController) {
 
 
-	app.get('/bundle/:id', middleware.requireGlobalToken, function(req, res) {
+	app.get('/bundle/:id', middleware.requireGlobalToken, function(req,
+		res) {
 		const bundleId = parseInt(req.params.id) || -1;
 		if (bundleId === -1) {
 			responseController.fail(res, 406,
 				"Please include bundleId in request url /bundle/:bundleId");
 			return;
 		}
+
+		var filesInclude = {};
+
+		const stage = req.query.stage || null;
+
+		console.log();
+		console.log();
+		console.log("getting bundle");
+		console.log("Stages");
+		console.log(stage);
+		console.log();
+		console.log();
+
+		if (stage !== null) {
+
+			filesInclude = {
+				model: db.files,
+				as: 'files',
+				attributes: {
+					exclude: ['createdAt', 'updatedAt', 'bundleId']
+				},
+				where: {
+					[db.Sequelize.Op.and]: [{
+						[db.Sequelize.Op.or]: [{
+							stages: {
+								[db.Op.like]: '%' + JSON.parse(stage) + '%'
+							}
+						}]
+					}]
+				}
+			};
+		} else {
+			filesInclude = {
+				model: db.files,
+				as: 'files',
+				attributes: {
+					exclude: ['createdAt', 'updatedAt', 'bundleId']
+				}
+			};
+		}
+
 		db.bundle.findOne({
 				where: {
 					id: bundleId
 				},
-				include: [{
-					model: db.files,
-					as: 'files',
-					attributes: {
-						exclude: ['createdAt', 'updatedAt', 'bundleId']
-					}
-				}]
+				include: [filesInclude]
 			})
 			.then(function(bundle) {
 				responseController.success(

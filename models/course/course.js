@@ -38,6 +38,14 @@ module.exports = function(sequelize, DataTypes) {
 			type: DataTypes.FLOAT,
 			allowNull: true,
 			defaultValue: 0.00
+		},
+		venue: {
+			type: DataTypes.STRING,
+			allowNull: false
+		},
+		welcome_doc_url: {
+			type: DataTypes.STRING,
+			allowNull: true
 		}
 	});
 };

@@ -15,6 +15,16 @@ module.exports = function(sequelize, DataTypes) {
     thumb_url: {
       type: DataTypes.STRING,
       allowNull: true
+    },
+    stages: {
+      type: DataTypes.STRING,
+      get: function() {
+        return this.getDataValue('stages')
+      },
+      set: function(val) {
+        return this.setDataValue('stages', JSON.stringify(val));
+      }
     }
+
   });
 };

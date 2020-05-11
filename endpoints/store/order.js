@@ -14,13 +14,16 @@ module.exports = function(app, middleware, db, underscore, responseController) {
 	app.post('/order/create', middleware.requireAuthentication, function(req,
 		res) {
 		var body = underscore.pick(req.body, 'reciepient_name', 'phone',
-			'address', 'city', 'zip_code', 'amount', 'remarks', 'address_cn');
+			'address', 'city', 'zip_code', 'amount', 'remarks', 'address_cn',
+			'colorId', 'sizeId');
 		if (body === null || body === undefined || isEmpty(body)) {
 			responseController.fail(res, 403,
 				"Please include order params in request body"
 			);
 			return;
 		}
+
+
 		body.status = "pending_payment";
 		db.cart_items.findAll({
 				where: {
@@ -42,12 +45,23 @@ module.exports = function(app, middleware, db, underscore, responseController) {
 				db.order.create(body)
 					.then(function(order) {
 						cart_items.forEach(function(cartItem) {
-							items.push({
+
+							var product = {
 								productId: cartItem.productId,
 								userId: cartItem.userId,
 								storeOrderId: order.id,
 								count: cartItem.count
-							});
+							};
+
+							if (cartItem.colorId) {
+								product.colorId = cartItem.colorId;
+							}
+
+							if (cartItem.sizeId) {
+								product.sizeId = cartItem.sizeId;
+							}
+
+							items.push(product);
 							deletableCartItemIds.push(cartItem.id);
 							productCountPromises.push(
 								db.product.decrement('count', {
@@ -163,7 +177,6 @@ module.exports = function(app, middleware, db, underscore, responseController) {
 				include: [{
 					model: db.user,
 					as: 'user',
-					attributes: ['id', 'name', 'phone', 'gender', 'avatar_url']
 				}, {
 					model: db.order_items,
 					as: 'items',
@@ -186,7 +199,8 @@ module.exports = function(app, middleware, db, underscore, responseController) {
 				);
 			})
 			.catch(function(e) {
-				responseController.fail(res, 406, e);
+				console.log(e);
+				responseController.fail(res, 200, "Swdas");
 			});
 	});
 
