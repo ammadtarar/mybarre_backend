@@ -127,6 +127,12 @@ module.exports = function(app, middleware, db, underscore, responseController) {
 					include: [{
 						model: db.product,
 						as: 'product'
+					}, {
+						model: db.color,
+						as: 'color'
+					}, {
+						model: db.size,
+						as: 'size'
 					}]
 				}]
 			})
@@ -188,6 +194,12 @@ module.exports = function(app, middleware, db, underscore, responseController) {
 					include: [{
 						model: db.product,
 						as: 'product'
+					}, {
+						model: db.color,
+						as: 'color'
+					}, {
+						model: db.size,
+						as: 'size'
 					}]
 				}]
 			})

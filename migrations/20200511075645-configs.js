@@ -11,9 +11,14 @@ module.exports = {
     */
     return Promise.all([
       queryInterface.addColumn(
-        'users',
-        'wechat_id',
-        Sequelize.STRING
+        'configs',
+        'shanghai_parcel_tariff',
+        Sequelize.FLOAT
+      ),
+      queryInterface.addColumn(
+        'configs',
+        'outside_shanghai_parcel_tariff',
+        Sequelize.FLOAT
       )
     ]);
   },

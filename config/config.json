@@ -1,8 +1,8 @@
 {
   "development": {
-    "username": null,
-    "password": null,
-    "database": "main",
+    "username": "mybarre_backend",
+    "password": "mybarre-x-sawatechnologies-2020",
+    "database": "local",
     "host": "localhost",
     "dialect": "sqlite",
     "storage": "./data/db.sqlite"

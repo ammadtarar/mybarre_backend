@@ -146,6 +146,12 @@ module.exports = function(app, middleware, db, underscore, responseController) {
 				include: [{
 					model: db.product,
 					as: 'product',
+				}, {
+					model: db.size,
+					as: 'size'
+				}, {
+					model: db.color,
+					as: 'color'
 				}]
 			})
 			.then(function(cart) {
@@ -235,7 +241,7 @@ module.exports = function(app, middleware, db, underscore, responseController) {
 						db.cart_items.update({
 								count: count - 1
 							}, {
-								where: updateWhere
+								where: uppdateWhere
 							})
 							.then(function(up) {
 								responseController.success(res, 200, "Cart updated.")
