@@ -168,14 +168,29 @@ module.exports = async function(app, middleware, db, underscore,
 				const bundlesRevenue = (Math.round((users[0].dataValues.total || 0) *
 					100) / 100).toFixed(2)
 				db.order.findAll({
+						where: {
+							status: {
+								[db.Op.not]: 'pending_payment'
+							}
+						},
 						attributes: [
 							[db.sequelize.fn('sum', db.sequelize.col('amount')), 'total'],
+							[db.sequelize.fn('sum', db.sequelize.col('shipping_fee')),
+								'shipping_fee_total'
+							],
 						]
 					})
 					.then(function(users) {
-						const storeRevenue = (Math.round((users[0].dataValues.total || 0) *
+						var storeRevenue = (Math.round((users[0].dataValues.total || 0) *
 							100) / 100).toFixed(
 							2);
+
+						var shippingRevenue = (Math.round((users[0].dataValues.shipping_fee_total ||
+								0) *
+							100) / 100).toFixed(
+							2);
+
+
 						db.membership.findAll({
 								attributes: [
 									[db.sequelize.fn('sum', db.sequelize.col('price')), 'total'],
@@ -199,7 +214,8 @@ module.exports = async function(app, middleware, db, underscore,
 									membership: membershipsRevenue,
 									license: licenseRevenue,
 									store: storeRevenue,
-									bundles: bundlesRevenue
+									bundles: bundlesRevenue,
+									shippingRevenue: shippingRevenue
 								})
 							})
 

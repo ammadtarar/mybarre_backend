@@ -14,6 +14,9 @@ module.exports = function(sequelize, DataTypes) {
 		amount: {
 			type: DataTypes.FLOAT
 		},
+		shipping_fee: {
+			type: DataTypes.FLOAT
+		},
 		address: {
 			type: DataTypes.STRING,
 			allowNull: false

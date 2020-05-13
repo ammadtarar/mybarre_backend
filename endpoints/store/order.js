@@ -15,7 +15,7 @@ module.exports = function(app, middleware, db, underscore, responseController) {
 		res) {
 		var body = underscore.pick(req.body, 'reciepient_name', 'phone',
 			'address', 'city', 'zip_code', 'amount', 'remarks', 'address_cn',
-			'colorId', 'sizeId');
+			'colorId', 'sizeId', 'shipping_fee');
 		if (body === null || body === undefined || isEmpty(body)) {
 			responseController.fail(res, 403,
 				"Please include order params in request body"
