@@ -26,12 +26,27 @@ module.exports = async function(app, middleware, db, underscore,
 		return new Promise(function(resolve, reject) {
 			model.findAll({
 					attributes: [
-						[db.sequelize.literal(`DATE("createdAt")`), 'date'],
+						[db.sequelize.fn('DATE_FORMAT', db.sequelize.col('createdAt'),
+								'%Y-%m-%d'),
+							'date'
+						],
 						[db.sequelize.literal(`COUNT(*)`), 'count']
 					],
 					group: ['date'],
 				})
 				.then(function(response) {
+					console.log();
+					console.log();
+					console.log();
+					console.log();
+					console.log("response");
+					console.log(response);
+					console.log();
+					console.log();
+					console.log();
+					console.log();
+					console.log();
+					console.log();
 					resolve(response);
 				})
 
@@ -265,6 +280,21 @@ module.exports = async function(app, middleware, db, underscore,
 		});
 	});
 
+	app.get('/dashboard/users/gender/ratio', middleware.requireAdminAuthentication,
+		function(
+			req, res) {
+			db.user.findAll({
+					attributes: [
+						[db.sequelize.literal(`gender`), 'gender'],
+						[db.sequelize.literal(`COUNT(*)`), 'count']
+					],
+					group: ['gender'],
+				})
+				.then(function(response) {
+					responseController.success(res, 200, response)
+				})
+
+		});
 
 
 };
