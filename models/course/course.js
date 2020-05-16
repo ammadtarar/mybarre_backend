@@ -19,6 +19,14 @@ module.exports = function(sequelize, DataTypes) {
 				return moment(this.getDataValue('end')).format('YYYY/MM/DD');
 			}
 		},
+		last_signup_date: {
+			type: DataTypes.DATE,
+			allowNull: false,
+			get() {
+				return moment(this.getDataValue('last_signup_date')).format(
+					'YYYY/MM/DD');
+			}
+		},
 		price: {
 			type: DataTypes.FLOAT,
 			allowNull: false,

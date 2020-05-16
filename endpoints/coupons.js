@@ -45,7 +45,15 @@ module.exports = function(app, middleware, db, underscore, responseController) {
 				},
 				include: [{
 					model: db.user,
-					as: 'users'
+					as: 'users',
+					include: [{
+						model: db.membership,
+						as: 'memberships',
+						include: [{
+							model: db.course,
+							as: 'course'
+						}]
+					}]
 				}]
 			})
 			.then(function(coupon) {
@@ -106,7 +114,15 @@ module.exports = function(app, middleware, db, underscore, responseController) {
 				],
 				include: [{
 					model: db.user,
-					as: 'users'
+					as: 'users',
+					include: [{
+						model: db.membership,
+						as: 'memberships',
+						include: [{
+							model: db.course,
+							as: 'course'
+						}]
+					}]
 				}]
 			})
 			.then(function(coupons) {

@@ -584,5 +584,24 @@ module.exports = function(app, db, rootDir, middleware, responseController) {
 	});
 
 
+	app.get('/download/static/:fileName', function(req, res) {
+		const fileName = req.params.fileName || null;
+		if (fileName === null) {
+			res.status(404).json({
+				message: "Please provide file name in the url"
+			})
+			return
+		}
+		const path = filesController.findFile('./static', req.params.fileName);
+		if (path === undefined || path === 'undefined') {
+			res.status(404).json({
+				message: "No file with name = " + fileName + " was found"
+			})
+			return
+		}
+		return res.download(rootDir + "/" + path);
+	});
+
+
 
 };

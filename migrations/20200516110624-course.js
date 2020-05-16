@@ -9,12 +9,11 @@ module.exports = {
       Example:
       return queryInterface.createTable('users', { id: Sequelize.INTEGER });
     */
-
     return Promise.all([
       queryInterface.addColumn(
-        'store_orders',
-        'shipping_fee',
-        Sequelize.FLOAT
+        'courses',
+        'last_signup_date',
+        Sequelize.DATE
       ),
     ]);
   },

@@ -17,10 +17,10 @@ module.exports = function(app, middleware, db, underscore, responseController) {
 	app.post('/course/create', middleware.requireAdminAuthentication, function(
 		req, res) {
 		var body = underscore.pick(req.body, 'name', 'start', 'end', 'price',
-			'seats', 'license_fee', 'venue', 'welcome_doc_url');
+			'seats', 'license_fee', 'venue', 'welcome_doc_url', 'last_signup_date');
 		if (isEmpty(body) || body.length < 6) {
 			responseController.fail(res, 403,
-				"Please provide course name , start , end , seats , price , welcome_doc_url , venue and licnese_fee in reqest body"
+				"Please provide course name , start , end , seats , price , welcome_doc_url, last_signup_date , venue and licnese_fee in reqest body"
 			);
 			return;
 		}
@@ -186,10 +186,10 @@ module.exports = function(app, middleware, db, underscore, responseController) {
 			return;
 		}
 		var body = underscore.pick(req.body, 'name', 'start', 'end', 'price',
-			'seats', 'license_fee', 'venue', 'welcome_doc_url');
+			'seats', 'license_fee', 'venue', 'welcome_doc_url', 'last_signup_date');
 		if (isEmpty(body)) {
 			responseController.fail(res, 403,
-				"Please provide course name , start , end , seats , price ,venue, welcome_doc_url & license_fee in reqest body"
+				"Please provide course name , start , end , seats , price ,venue, welcome_doc_url , last_signup_date & license_fee in reqest body"
 			);
 			return;
 		}
