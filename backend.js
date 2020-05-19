@@ -97,17 +97,24 @@ app.get('/disk', function(req, res) {
 	var disk = require('diskusage');
 	disk.check('/', function(err, info) {
 		res.json({
-			total: bytesToSize(info.total),
-			free: bytesToSize(info.available)
+			total: bytesToSize(info.total, false),
+			free: bytesToSize(info.available, false),
+			total_str: bytesToSize(info.total, true),
+			free_str: bytesToSize(info.available, true)
 		})
 	});
 });
 
-function bytesToSize(bytes) {
+function bytesToSize(bytes, needUnit) {
 	var sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
 	if (bytes == 0) return '0 Byte';
 	var i = parseInt(Math.floor(Math.log(bytes) / Math.log(1024)));
-	return Math.round(bytes / Math.pow(1024, i), 2) + ' ' + sizes[i];
+	if (needUnit) {
+		return Math.round(bytes / Math.pow(1024, i), 2) + ' ' + sizes[i];
+	} else {
+		return Math.round(bytes / Math.pow(1024, i), 2);
+	}
+
 }
 
 //INIT DB AND EXPRESS
