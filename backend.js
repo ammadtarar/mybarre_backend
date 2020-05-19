@@ -93,7 +93,22 @@ require('./endpoints/store/order.js')(app, middleware, db, _,
 require('./endpoints/coupons.js')(app, middleware, db, _,
 	responseController);
 
+app.get('/disk', function(req, res) {
+	var disk = require('diskusage');
+	disk.check('/', function(err, info) {
+		res.json({
+			total: bytesToSize(info.total),
+			free: bytesToSize(info.available)
+		})
+	});
+});
 
+function bytesToSize(bytes) {
+	var sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
+	if (bytes == 0) return '0 Byte';
+	var i = parseInt(Math.floor(Math.log(bytes) / Math.log(1024)));
+	return Math.round(bytes / Math.pow(1024, i), 2) + ' ' + sizes[i];
+}
 
 //INIT DB AND EXPRESS
 db.sequelize.sync({
