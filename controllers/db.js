@@ -10,7 +10,7 @@ if (process.env.ENV === 'local') {
       storage: './data/db.sqlite',
       operatorsAliases: false
     });
-} else {
+} else if (process.env.ENV === "staging") {
   sequelize = new Sequelize(
     process.env.db_name,
     "mybarre_backend",
@@ -18,6 +18,16 @@ if (process.env.ENV === 'local') {
       host: 'mybarrefitness.mysql.rds.aliyuncs.com',
       dialect: 'mysql',
       port: 33333,
+      logging: true
+    });
+} else if (process.env.ENV === "production") {
+  sequelize = new Sequelize(
+    process.env.db_name,
+    "mybarre_admin",
+    "mybarrefitness", {
+      host: 'mybarre-fitness.mysql.rds.aliyuncs.com',
+      dialect: 'mysql',
+      port: 3306,
       logging: true
     });
 }

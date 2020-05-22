@@ -306,7 +306,6 @@ var adminHtml = '<html>' +
 	'    <body style="margin: 0px !important ;background:white">' +
 	'        <div class="main">' +
 	'        ' +
-	'            <img src="https://uploads.wework.cn/dfdb0a41-b833-44e5-b765-09d361bcb124" >' +
 	'            <label class="vertical_space">' +
 	'                You have been made administrator for <b>MYBarre</b>. Please refer to credentials below to login to the administrator dashboard.' +
 	'            </label>' +

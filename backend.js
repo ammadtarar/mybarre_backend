@@ -25,12 +25,12 @@ if (enviorment === null) {
 	process.env.base_url = "https://api.mybarrefitness.com";
 	process.env.db_name = "production";
 	process.env.admin_url = "https://dashboard.mybarrefitness.com";
-	if (force) {
-		console.log('\x1b[40m\x1b[31m',
-			"CANNOT RESET DATA ON PRODUCTION SERVER. ONLY LOCAL DATA CAN BE ERASED"
-		)
-		return
-	}
+	// if (force) {
+	// 	console.log('\x1b[40m\x1b[31m',
+	// 		"CANNOT RESET DATA ON PRODUCTION SERVER. ONLY LOCAL DATA CAN BE ERASED"
+	// 	)
+	// 	return
+	// }
 } else {
 	console.log('\x1b[40m\x1b[31m',
 		"Please provde a valid ENV argument. ENV can be LOCAL , STAGING or PRODUCTION. For example : ENV=STAGING npm start"
