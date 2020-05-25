@@ -12,7 +12,8 @@ function isEmpty(obj) {
   return true;
 }
 
-module.exports = function(app, middleware, db, underscore, responseController) {
+module.exports = async function(app, middleware, db, underscore,
+  responseController) {
 
   // GET WECHAT USER'S OPEN_ID AND SESSION_KEY USING JSCODE FROM MINIPROGRAM
   app.post("/user/openid/by/jscode", function(req, res) {
@@ -38,11 +39,19 @@ module.exports = function(app, middleware, db, underscore, responseController) {
         "Please send open_id in request body");
       return;
     }
+
+    var userType = req.body.type || '';
+    if (userType === '') {
+      responseController.fail(res, 403,
+        "Please send user type in request body");
+      return;
+    }
+
     var userInstance, token;
     db.user
-      .authenticateByOpenId(openId)
+      .authenticateByOpenId(openId, userType)
       .then(function(user) {
-        token = user.generateToken("authentication");
+        token = user.generateToken(userType);
         userInstance = user;
         return db.user.update({
           token: token
@@ -70,109 +79,135 @@ module.exports = function(app, middleware, db, underscore, responseController) {
 
   });
 
-  // REGISTER USING WECHAT MINIPROGRAM JSCODE
-  app.post('/user/mp/register', function(req, res) {
-    var body = underscore.pick(req.body, 'jscode');
-    wechatController.jscode2session(body.jscode)
-      .then(function(data) {
-        const openid = data.openid || "";
-        if (openid === "") {
-          responseController.fail(res, 404,
-            "Failed to get open id and session key from wechat service"
-          );
-          return;
-        }
-        db.user.create({
-            open_id: openid,
-            session_key: data.session_key
-          })
-          .then(function(regUser) {
-            console.log(regUser);
 
-            var userInstance, token;
-            db.user
-              .authenticateByOpenId(regUser.open_id)
-              .then(function(user) {
-                token = user.generateToken("authentication");
-                userInstance = user;
-                return db.user.update({
-                  token: token,
-                  session_key: data.session_key
-                }, {
-                  where: {
-                    id: userInstance.toPublicJSON().id
-                  }
-                });
-              })
-              .then(function(u) {
-                var obj = userInstance.toPublicJSON();
-                obj.token = token;
-                res.header("Token", token);
-                responseController.success(
-                  res,
-                  200,
-                  obj
-                );
+  async function userExists(openId, type) {
+    return new Promise(function(resolve, reject) {
 
-              })
-              .catch(function(e) {
-                responseController.fail(res, 402, e);
-              });
+      db.user.findOne({
+          where: {
+            open_id: openId,
+            type: type
+          }
+        })
+        .then(function(user) {
+          if (user) {
+            resolve(true);
+          } else {
+            resolve(false);
+          }
+        })
+    })
+  }
 
-          })
-          .catch(function(e) {
-            const msg = e.message;
-            if (msg === 'Validation error') {
-              var userInstance, token;
-              db.user
-                .authenticateByOpenId(openid)
-                .then(function(user) {
-                  token = user.generateToken("authentication");
-                  userInstance = user;
-                  return db.user.update({
-                    token: token,
-                    session_key: data.session_key
-                  }, {
-                    where: {
-                      id: userInstance.toPublicJSON().id
-                    }
-                  });
-                })
-                .then(function(u) {
-                  var obj = userInstance.toPublicJSON();
-                  obj.token = token;
-                  res.header("Token", token);
-                  responseController.success(
-                    res,
-                    202,
-                    obj
-                  );
+  async function login(openid, userType, session_key) {
+    return new Promise(function(resolve, reject) {
 
-                })
-                .catch(function(e) {
-                  responseController.fail(res, 402, e);
-                });
-            } else {
-              responseController.fail(res, 403, String(e));
+
+      var userInstance, token;
+      db.user
+        .authenticateByOpenId(openid, userType)
+        .then(function(user) {
+          token = user.generateToken(userType);
+          userInstance = user;
+          return db.user.update({
+            token: token,
+            session_key: session_key
+          }, {
+            where: {
+              id: userInstance.toPublicJSON().id
             }
-            console.log("");
-            console.log(msg);
-
           });
-      })
-      .catch(function(err) {
-        responseController.fail(res, 404, {
-          message: "Error while getting open id from wx",
-          error: err
+        })
+        .then(function(u) {
+          var obj = userInstance.toPublicJSON();
+          obj.token = token;
+          resolve(obj)
+
+        })
+        .catch(function(e) {
+          reject(e);
         });
-      });
+
+    })
+  }
+
+
+
+  // REGISTER USING WECHAT MINIPROGRAM JSCODE
+  app.post('/user/mp/register', async function(req, res) {
+    var body = underscore.pick(req.body, 'jscode', 'type');
+
+
+    const userType = body.type || "";
+    if (userType === "" || (userType !== 'full' && userType !== 'ce-only')) {
+      responseController.fail(res, 404,
+        "Please send user type in request body. Acceptable user types are 'full' and 'ce-only'"
+      );
+      return;
+    }
+
+
+    const wechatData = await wechatController.jscode2session(body.jscode);
+    const openid = wechatData.openid || null;
+    const session_key = wechatData.session_key || null;
+
+    if (openid === null || session_key === null) {
+      responseController.fail(res, 404,
+        "Failed to get open id and session key from wechat service"
+      );
+      return;
+    }
+
+    const exists = await userExists(openid, userType);
+
+    if (exists) {
+
+      const userObject = await login(openid, userType, session_key) ||
+        null;
+      res.header("Token", userObject.token);
+      responseController.success(
+        res,
+        202,
+        userObject
+      );
+
+    } else {
+
+      db.user.create({
+          open_id: openid,
+          session_key: session_key,
+          type: userType
+        })
+        .then(async function(regUser) {
+          const userObject = await login(regUser.open_id, userType,
+            session_key) || null;
+          res.header("Token", userObject.token);
+          responseController.success(
+            res,
+            202,
+            userObject
+          );
+        })
+        .catch(function(e) {
+          responseController.fail(res, 403, String(e));
+        });
+    }
 
   });
 
 
   //LOGIN BY WX JSCODE
   app.post('/user/mp/login', function(req, res) {
-    var body = underscore.pick(req.body, 'jscode');
+    var body = underscore.pick(req.body, 'jscode', 'type');
+
+
+    var userType = body.type || '';
+    if (userType === '') {
+      responseController.fail(res, 403,
+        "Please send user type in request body");
+      return;
+    }
+
     wechatController.jscode2session(body.jscode)
       .then(function(data) {
         const openid = data.openid || "";
@@ -184,9 +219,9 @@ module.exports = function(app, middleware, db, underscore, responseController) {
         }
         var userInstance, token;
         db.user
-          .authenticateByOpenId(openid)
+          .authenticateByOpenId(openid, userType)
           .then(function(user) {
-            token = user.generateToken("authentication");
+            token = user.generateToken(userType);
             userInstance = user;
             return db.user.update({
               token: token,
@@ -587,9 +622,23 @@ module.exports = function(app, middleware, db, underscore, responseController) {
       where = {
         [db.Sequelize.Op.and]: fullQuery
       }
-      console.log("where");
-      console.log(where);
+
     }
+
+    const userType = req.query.type || null;
+    if (userType !== null) {
+      where.type = userType;
+    }
+
+    console.log();
+    console.log();
+    console.log();
+    console.log("where");
+    console.log(where);
+    console.log();
+    console.log();
+    console.log();
+
 
     var membershipInclude = {}
     const status = req.query.status || null;

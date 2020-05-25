@@ -14,6 +14,16 @@ module.exports = function(sequelize, DataTypes) {
         type: DataTypes.STRING,
         allowNull: true
       },
+      type: {
+        type: DataTypes.ENUM,
+        allowNull: false,
+        unique: false,
+        values: [
+          'full',
+          'ce-only'
+        ],
+        defaultValue: 'full'
+      },
       nickname: {
         type: DataTypes.STRING,
         allowNull: true
@@ -35,8 +45,7 @@ module.exports = function(sequelize, DataTypes) {
       },
       open_id: {
         type: DataTypes.STRING,
-        allowNull: true,
-        unique: true
+        allowNull: true
       },
       top_size: {
         type: DataTypes.STRING,
@@ -162,14 +171,15 @@ module.exports = function(sequelize, DataTypes) {
       }
     }
   );
-  user.authenticateByOpenId = function(openId) {
+  user.authenticateByOpenId = function(openId, userType) {
     return new Promise(function(resolve, reject) {
       if (typeof openId !== 'string') {
         return reject("openid should be a string");
       }
       user.findOne({
           where: {
-            open_id: openId
+            open_id: openId,
+            type: userType
           }
         })
         .then(function(user) {
@@ -236,7 +246,7 @@ module.exports = function(sequelize, DataTypes) {
     return _.pick(json, 'id',
       'createdAt', 'updatedAt', 'first_name', 'last_name', 'nickname',
       'certificate_name', 'wechat_id', 'phone', 'avatar_url', 'open_id',
-      'email', 'gender', 'manual_lang');
+      'email', 'gender', 'manual_lang', 'type');
   };
 
   return user;
