@@ -16,11 +16,11 @@
     "port": 33333
   },
   "production": {
-    "username": "root",
-    "password": null,
-    "database": "database_production",
-    "host": "127.0.0.1",
+    "username": "mybarre_admin",
+    "password": "mybarrefitness",
+    "database": "production",
+    "host": "mybarre-fitness.mysql.rds.aliyuncs.com",
     "dialect": "mysql",
-    "operatorsAliases": false
+    "port": 3306
   }
 }
