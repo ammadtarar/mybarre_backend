@@ -224,7 +224,7 @@ module.exports = function(app, db, rootDir, middleware, responseController) {
 		}
 		if (isEmpty(req.body)) {
 			responseController.fail(res, 406,
-				"Request body is empty. Please include 'name' and/or 'stages' field in the request body"
+				"Request body is empty. Please include 'name' , 'stages' and/or 'thumb_url' field in the request body"
 			);
 			return;
 		}
@@ -249,18 +249,6 @@ module.exports = function(app, db, rootDir, middleware, responseController) {
 
 	app.post('/file/upload', middleware.requireGlobalToken, function(req, res) {
 
-		console.log();
-		console.log();
-		console.log();
-		console.log();
-		console.log("PARAMS");
-		console.log(req.query);
-		console.log("BODY");
-		console.log(req.body);
-		console.log("STAGES");
-		// console.log(JSON.parse(req.query.stages));
-		console.log();
-		console.log();
 		var type = req.query.type || "";
 		if (type === "") {
 			responseController.fail(res, 444, {
@@ -603,5 +591,36 @@ module.exports = function(app, db, rootDir, middleware, responseController) {
 	});
 
 
+	app.post('/files/update/indexes' , middleware.requireAdminAuthentication , function(req , res){
+		if (isEmpty(req.body)) {
+			responseController.fail(res, 406,
+				"Request body is empty. Please send files array with following structure { files : [ {id : 1 , index : 1} ]}"
+			);
+			return;
+		}
+
+		var promises = [];
+		req.body.forEach((item, i) => {
+			promises.push(
+				db.files.update({index : item.index} , {where : { id : item.id}})
+			);
+		});
+
+
+		Promise
+			.all(promises)
+			.then(responses => {
+				console.log('**********COMPLETE RESULTS****************');
+				console.log(responses);
+				responseController.success(res , 200 , responses);
+			})
+			.catch(err => {
+				console.log('**********ERROR RESULT****************');
+				console.log(err);
+				responseController.fail(res , 403 , err)
+			});
+
+
+	});
 
 };

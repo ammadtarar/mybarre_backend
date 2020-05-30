@@ -252,6 +252,7 @@ module.exports = function(app, middleware, db, underscore, responseController) {
 						'First Name': membership.user.first_name,
 						'Family Name ': membership.user.last_name,
 						'Nickname/English Name': membership.user.nickname,
+						'Name on Certificate': membership.user.certificate_name,
 						'Gender': membership.user.gender,
 						'Email': membership.user.email,
 						'Phone': membership.user.phone,

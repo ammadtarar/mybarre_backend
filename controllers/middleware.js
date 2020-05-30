@@ -94,6 +94,14 @@ module.exports = function(db) {
         });
     },
     requireAdminAuthentication: function(req, res, next) {
+      console.log();
+      console.log();
+      console.log();
+      console.log("inside requireAdminAuthentication");
+      console.log(req.get("Authorization"));
+      console.log();
+      console.log();
+      console.log();
       var token = req.get("Authorization") || "";
       if (token === undefined || token === "") {
         res.status(401).send({

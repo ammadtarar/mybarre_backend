@@ -16,6 +16,10 @@ module.exports = function(sequelize, DataTypes) {
       type: DataTypes.STRING,
       allowNull: true
     },
+    index: {
+      type: DataTypes.NUMBER,
+      defaultValue: 0
+    },
     stages: {
       type: DataTypes.STRING,
       get: function() {
