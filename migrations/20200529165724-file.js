@@ -13,7 +13,7 @@ module.exports = {
       queryInterface.addColumn(
         'files',
         'index',
-        Sequelize.NUMBER
+        Sequelize.INTEGER
       ),
     ]);
   },
