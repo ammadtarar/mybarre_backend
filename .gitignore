@@ -2,3 +2,5 @@ data
 disk
 data/db.sqlite
 db.sqlite
+node_modules/
+node_modules
