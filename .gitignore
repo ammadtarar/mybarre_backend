@@ -1,3 +1,4 @@
 data
 disk
 data/db.sqlite
+db.sqlite

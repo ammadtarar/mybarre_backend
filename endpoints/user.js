@@ -629,13 +629,18 @@ module.exports = function(app, middleware, db, underscore, responseController) {
         console.log(users);
 
         var publicUsers = [];
+        var discardCount = 0;
         users.rows.forEach(function(user) {
-          var u = user.toPublicJSON();
-          u['memberships'] = user.memberships
-          publicUsers.push(u)
+          if (user.first_name !== null && user.last_name !== null && user.nickname !== null && user.wechat_id !== null && user.phone !== null) {
+            var u = user.toPublicJSON();
+            u['memberships'] = user.memberships
+            publicUsers.push(u)
+          }else{
+            discardCount++;
+          }
         })
         responseController.success(res, 200, {
-          count: users.count,
+          count: users.count - discardCount,
           rows: publicUsers
         });
       })
