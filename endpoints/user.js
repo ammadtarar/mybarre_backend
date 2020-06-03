@@ -616,6 +616,27 @@ module.exports = function(app, middleware, db, underscore, responseController) {
       };
     }
 
+
+    where.first_name =  {
+      [db.Op.ne]: null
+    }
+
+    where.last_name =  {
+      [db.Op.ne]: null
+    }
+
+    where.nickName =  {
+      [db.Op.ne]: null
+    }
+
+    where.phone =  {
+      [db.Op.ne]: null
+    }
+
+    where.email =  {
+      [db.Op.ne]: null
+    }
+
     db.user.findAndCountAll({
         where: where,
         limit: limit,
@@ -629,18 +650,13 @@ module.exports = function(app, middleware, db, underscore, responseController) {
         console.log(users);
 
         var publicUsers = [];
-        var discardCount = 0;
         users.rows.forEach(function(user) {
-          if (user.first_name !== null && user.last_name !== null && user.nickname !== null && user.wechat_id !== null && user.phone !== null) {
-            var u = user.toPublicJSON();
-            u['memberships'] = user.memberships
-            publicUsers.push(u)
-          }else{
-            discardCount++;
-          }
+          var u = user.toPublicJSON();
+          u['memberships'] = user.memberships
+          publicUsers.push(u)
         })
         responseController.success(res, 200, {
-          count: users.count - discardCount,
+          count: users.count,
           rows: publicUsers
         });
       })
