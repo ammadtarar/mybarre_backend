@@ -10,9 +10,13 @@ function isEmpty(obj) {
 module.exports = async function(app, middleware, db, underscore,
 	responseController) {
 
-	async function getTotal(model) {
+	async function getTotal(model , where) {
 		return new Promise(function(resolve, reject) {
-			model.count()
+			var args = {};
+			if(where){
+				args.where = where;
+			}
+			model.count(args)
 				.then(function(users) {
 					resolve(users);
 				})
@@ -35,18 +39,6 @@ module.exports = async function(app, middleware, db, underscore,
 					group: ['date'],
 				})
 				.then(function(response) {
-					console.log();
-					console.log();
-					console.log();
-					console.log();
-					console.log("response");
-					console.log(response);
-					console.log();
-					console.log();
-					console.log();
-					console.log();
-					console.log();
-					console.log();
 					resolve(response);
 				})
 
@@ -255,10 +247,33 @@ module.exports = async function(app, middleware, db, underscore,
 			})
 	});
 
-	app.get('/dashboard/total', middleware.requireAdminAuthentication, async function(
+	app.get('/dashboard/total', async function(
 		req, res) {
+
+
+		var where = {};
+		
+		where.first_name =  {
+			[db.Op.ne]: null
+		  }
+	  
+		  where.last_name =  {
+			[db.Op.ne]: null
+		  }
+	  
+		  where.nickName =  {
+			[db.Op.ne]: null
+		  }
+	  
+		  where.phone =  {
+			[db.Op.ne]: null
+		  }
+	  
+		  where.email =  {
+			[db.Op.ne]: null
+		  }
 		responseController.success(res, 200, {
-			users: await getTotal(db.user),
+			users: await getTotal(db.user , where),
 			admins: await getTotal(db.admin),
 			bundles: await getTotal(db.bundle),
 			products: await getTotal(db.product),
