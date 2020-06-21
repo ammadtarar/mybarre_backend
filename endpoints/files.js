@@ -569,6 +569,9 @@ module.exports = function(app, db, rootDir, middleware, responseController) {
 			return
 		}
 
+		if(!fileName.includes(".mp4")){
+			return res.download(rootDir + "/" + path);
+		}
 		
 		
 
@@ -576,13 +579,6 @@ module.exports = function(app, db, rootDir, middleware, responseController) {
 		const fileSize = stat.size
 		const range = req.headers.range
 
-		console.log();
-		console.log();
-		console.log();
-		console.log("FILE TYPE");
-		console.log(stat.mimetype);
-		console.log();
-		console.log();
 
 		
 		if (range) {
