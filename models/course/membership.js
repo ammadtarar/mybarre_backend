@@ -38,6 +38,7 @@ module.exports = function(sequelize, DataTypes) {
 		status: {
 			type: DataTypes.ENUM,
 			values: [
+				'temporary-freeze',
 				'pre-instructor', // MEANS USER PAIDED AND SIGNED UP
 				'pre-instructor-tbc', //USER DID NOT ATTEND TRAINING CLASSES
 				'instructor-in-training', // USER ATTENDED THE TRAINING CLASSES

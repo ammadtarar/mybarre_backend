@@ -422,6 +422,49 @@ module.exports = function(app, middleware, db, underscore, responseController) {
 
   });
 
+
+  app.post('/user/update/:id', middleware.requireAdminAuthentication, function(req,
+    res) {
+    const body = req.body;
+
+    const id = parseInt(req.params.id) || -1;
+    if(id === -1){
+      responseController.fail(res, 403,
+        "Please send user id");
+      return
+    }
+    if (body === null || body === undefined || Object.getOwnPropertyNames(
+        body)
+      .length <= 0) {
+      responseController.fail(res, 403,
+        "Body is empty . Please send the body with key and value");
+      return
+    }
+
+    db.user.update(body, {
+        where: {
+          id: id
+        }
+      })
+      .then(function(result) {
+        console.log(result);
+
+        if (result != 1) {
+          responseController.fail(res, 403, 'Failed to update profile');
+        } else {
+          responseController.success(res, 200,
+            "Profile updated successful")
+        }
+      }, function(e) {
+        responseController.fail(res, 403, e);
+      })
+      .catch(function(e) {
+        responseController.fail(res, 404, e);
+      });
+
+  });
+
+
   //GET PROFILE
   app.get('/user/my/profile', middleware.requireAuthentication, function(req,
     res) {
@@ -555,10 +598,6 @@ module.exports = function(app, middleware, db, underscore, responseController) {
               [db.Op.like]: '%' + keyword + '%'
             }
           }, {
-            gender: {
-              [db.Op.like]: '%' + keyword + '%'
-            }
-          }, {
             nationality: {
               [db.Op.like]: '%' + keyword + '%'
             }
@@ -582,11 +621,25 @@ module.exports = function(app, middleware, db, underscore, responseController) {
         })
       }
 
-
-
       where = {
         [db.Sequelize.Op.and]: fullQuery
       }
+
+      const gender = req.query.gender || null;
+      if(gender !== null){
+        where.gender = {
+          [db.Sequelize.Op.eq] : gender
+        }
+      }
+
+      const have_wechat_id = req.query.have_wechat_id || null;
+      if(have_wechat_id !== null){
+        where.wechat_id = {
+          [have_wechat_id === 'yes' ? db.Op.ne : db.Op.eq] : null
+        }
+      }
+
+
       console.log("where");
       console.log(where);
     }
@@ -647,16 +700,22 @@ module.exports = function(app, middleware, db, underscore, responseController) {
         include: [membershipInclude]
       })
       .then(function(users) {
-        console.log(users);
-
         var publicUsers = [];
+        var offset = 0;
         users.rows.forEach(function(user) {
+
+
           var u = user.toPublicJSON();
           u['memberships'] = user.memberships
-          publicUsers.push(u)
+          if(user.memberships && user.memberships.length > 0){
+            publicUsers.push(u)
+          }else{
+            offset++;
+          }
+
         })
         responseController.success(res, 200, {
-          count: users.count,
+          count: users.count - offset,
           rows: publicUsers
         });
       })

@@ -478,6 +478,7 @@ module.exports = function(app, middleware, db, underscore, responseController,
 			}
 
 			var validStatuses = [
+				'temporary-freeze',
 				'pre-instructor', // MEANS USER PAIDED AND SIGNED UP
 				'pre-instructor-tbc', //USER DID NOT ATTEND TRAINING CLASSES
 				'instructor-in-training', // USER ATTENDED THE TRAINING CLASSES
