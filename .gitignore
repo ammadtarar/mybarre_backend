@@ -1,6 +1,3 @@
-data
-disk
-data/db.sqlite
-db.sqlite
+data/
+disk/
 node_modules/
-node_modules
