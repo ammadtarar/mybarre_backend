@@ -260,7 +260,12 @@ module.exports = function(app, middleware, db, underscore, responseController) {
 						'Training Status': membership.status.replaceAll("-", ' ').toUpperCase(),
 						'City': membership.user.city,
 						'Studio Name': membership.user.studio_name,
-						'Studio Manager Name': membership.user.studio_manager_name
+						'Studio Manager Name': membership.user.studio_manager_name,
+						'Nationality': membership.user.nationality,
+						'Occupation': membership.user.occupation,
+						'Training Top Size': membership.user.top_size,
+						'Training Sock Size': membership.user.sock_size,
+						'Manual Language': membership.user.manual_lang,
 					}
 					jsonArray.push(tempArry);
 				});
