@@ -1,26 +1,18 @@
 {
-  "development": {
-    "username": "mybarre_backend",
-    "password": "mybarre-x-sawatechnologies-2020",
-    "database": "local",
-    "host": "localhost",
-    "dialect": "sqlite",
-    "storage": "./data/db.sqlite"
-  },
-  "staging": {
-    "username": "mybarre_backend",
-    "password": "mybarre-x-sawatechnologies-2020",
-    "database": "staging",
-    "host": "mybarrefitness.mysql.rds.aliyuncs.com",
-    "dialect": "mysql",
-    "port": 33333
-  },
-  "production": {
-    "username": "mybarre_admin",
-    "password": "mybarrefitness",
-    "database": "production",
-    "host": "mybarre-fitness.mysql.rds.aliyuncs.com",
-    "dialect": "mysql",
-    "port": 3306
-  }
+    "development": {
+        "username": "mybarre_backend",
+        "password": "mybarre-x-sawatechnologies-2020",
+        "database": "local",
+        "host": "localhost",
+        "dialect": "sqlite",
+        "storage": "./data/db.sqlite"
+    },
+    "staging": {
+        "username": "mybarre_admin",
+        "password": "mybarrefitness",
+        "database": "dev",
+        "host": "mybarre-fitness.mysql.rds.aliyuncs.com",
+        "dialect": "mysql",
+        "port": 3306
+    }
 }

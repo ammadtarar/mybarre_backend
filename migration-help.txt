@@ -15,3 +15,13 @@ return Promise.all([
 STEP - 3 : run following cmd 
 
 sequelize db:migrate
+
+
+"production": {
+        "username": "mybarre_admin",
+        "password": "mybarrefitness",
+        "database": "production",
+        "host": "mybarre-fitness.mysql.rds.aliyuncs.com",
+        "dialect": "mysql",
+        "port": 3306
+    }
