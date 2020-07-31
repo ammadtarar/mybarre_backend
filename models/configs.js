@@ -29,6 +29,11 @@ module.exports = function(sequelize, DataTypes) {
             type: DataTypes.BOOLEAN,
             allowNull: true,
             defaultValue: false
+        },
+        license_fee: {
+            type: DataTypes.FLOAT,
+            allowNull: true,
+            defaultValue: 1000
         }
     });
 };

@@ -14,7 +14,7 @@ return Promise.all([
 
 STEP - 3 : run following cmd 
 
-sequelize db:migrate
+npx sequelize db:migrate
 
 
 "production": {

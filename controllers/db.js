@@ -66,6 +66,7 @@ db.user.belongsToMany(db.bundle, {
 });
 
 //COURSE
+db.license_renewals = sequelize.import('../models/course/license_renewal.js')
 db.course = sequelize.import('../models/course/course.js');
 db.membership = sequelize.import('../models/course/membership.js');
 db.membership.belongsTo(db.user, {
