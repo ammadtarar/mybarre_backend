@@ -24,6 +24,9 @@ module.exports = function(app, middleware, db, underscore, responseController) {
             return;
         }
 
+
+
+
         var filesInclude = {};
 
         const stage = req.query.stage || null;
@@ -55,6 +58,20 @@ module.exports = function(app, middleware, db, underscore, responseController) {
                 }
             };
         }
+
+        console.log();
+        console.log();
+        console.log();
+        console.log();
+        console.log();
+        console.log();
+        console.log("HELLO");
+        console.log(filesInclude);
+        console.log();
+        console.log();
+        console.log();
+        console.log();
+        console.log();
 
         db.bundle.findOne({
                 where: {

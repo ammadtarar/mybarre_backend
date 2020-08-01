@@ -2,6 +2,7 @@ const cryptojs = require('crypto-js');
 const fs = require('fs');
 const wechatController = require('../controllers/wechatController.js');
 var WXBizDataCrypt = require('../controllers/WXBizDataCrypt');
+const emailController = require('../controllers/emailController.js');
 
 function isEmpty(obj) {
     for (var prop in obj) {
@@ -458,6 +459,7 @@ module.exports = function(app, middleware, db, underscore, responseController) {
                                 db.membership.update({
                                         start: body.start,
                                         end: body.end,
+                                        license_creation_date: body.licenseStart
                                     }, {
                                         where: {
                                             id: membership.id
@@ -469,11 +471,43 @@ module.exports = function(app, middleware, db, underscore, responseController) {
                             } else {
                                 responseController.success(res, 200, "User status updated but failed to find membership for the user");
                             }
+
                         })
 
                 } else {
                     responseController.success(res, 200, "User status updated successfully");
                 }
+
+                db.user.findOne({
+                        where: {
+                            id: userId
+                        }
+                    })
+                    .then(function(user) {
+                        emailController.sendUserStatusUpdateEmail(user, status, message || '')
+                            .then(function() {
+                                console.log();
+                                console.log();
+                                console.log();
+                                console.log("USER EMAIL SENT");
+                                console.log();
+                                console.log();
+                                console.log();
+
+                            })
+                            .catch(function(e) {
+                                console.log();
+                                console.log();
+                                console.log();
+                                console.log("USER EMAIL FAILED TO SENT");
+                                console.log(e);
+                                console.log();
+                                console.log();
+                            })
+                    })
+
+
+
             })
             .catch(function(e) {
                 console.log(e);
