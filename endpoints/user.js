@@ -459,7 +459,8 @@ module.exports = function(app, middleware, db, underscore, responseController) {
                                 db.membership.update({
                                         start: body.start,
                                         end: body.end,
-                                        license_creation_date: body.licenseStart
+                                        license_creation_date: body.licenseStart,
+                                        courseId: body.courseId
                                     }, {
                                         where: {
                                             id: membership.id
@@ -486,23 +487,11 @@ module.exports = function(app, middleware, db, underscore, responseController) {
                     .then(function(user) {
                         emailController.sendUserStatusUpdateEmail(user, status, message || '')
                             .then(function() {
-                                console.log();
-                                console.log();
-                                console.log();
                                 console.log("USER EMAIL SENT");
-                                console.log();
-                                console.log();
-                                console.log();
-
                             })
                             .catch(function(e) {
-                                console.log();
-                                console.log();
-                                console.log();
                                 console.log("USER EMAIL FAILED TO SENT");
                                 console.log(e);
-                                console.log();
-                                console.log();
                             })
                     })
 
