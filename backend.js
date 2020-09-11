@@ -12,25 +12,26 @@ if (enviorment === null) {
     process.env.base_url = "http://localhost:" + PORT;
     process.env.db_name = "local";
 } else if (enviorment.toLowerCase() === 'staging') {
+    if (force) {
+        console.log(
+            "CANNOT RESET DATA ON STAGING SERVER. ONLY LOCAL DATA CAN BE ERASED"
+        )
+        return
+    }
     process.env.base_url = "https://api-staging.mybarrefitness.com";
     process.env.db_name = "staging";
     process.env.admin_url = "https://dashboard-staging.mybarrefitness.com";
-    // if (force) {
-    // 	console.log('\x1b[40m\x1b[31m',
-    // 		"CANNOT RESET DATA ON STAGING SERVER. ONLY LOCAL DATA CAN BE ERASED"
-    // 	)
-    // 	return
-    // }
 } else if (enviorment.toLowerCase() === 'production') {
+    if (force) {
+        console.log(
+            "CANNOT RESET DATA ON PRODUCTION SERVER. ONLY LOCAL DATA CAN BE ERASED"
+        )
+        return
+    }
     process.env.base_url = "https://api.mybarrefitness.com";
     process.env.db_name = "production";
     process.env.admin_url = "https://dashboard.mybarrefitness.com";
-    // if (force) {
-    // 	console.log('\x1b[40m\x1b[31m',
-    // 		"CANNOT RESET DATA ON PRODUCTION SERVER. ONLY LOCAL DATA CAN BE ERASED"
-    // 	)
-    // 	return
-    // }
+
 } else {
     console.log('\x1b[40m\x1b[31m',
         "Please provde a valid ENV argument. ENV can be LOCAL , STAGING or PRODUCTION. For example : ENV=STAGING npm start"

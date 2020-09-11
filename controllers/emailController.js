@@ -1,4 +1,5 @@
 const nodemailer = require("nodemailer");
+const { reject } = require("underscore");
 
 var en =
     '<html>' +
@@ -582,41 +583,41 @@ let transporter = nodemailer.createTransport({
 });
 
 async function sendVideoSubmissionEmail(membership) {
-    console.log("Sending email in email controller");
-    new Promise(async function(resolve, reject) {
-        var body;
-        var subject;
-        console.log(membership);
-        const user = membership.user;
-        const prefferedLang = user.preffered_language || 'en';
-        console.log("prefferedLang = ", prefferedLang);
-        if (prefferedLang === 'en') {
-            body = en;
-            subject = "MYbarre Instructor Exam Video Submission";
-        } else {
-            body = cn;
-            subject = "MYbarre教练考试视频提交";
-        }
-        body = body.replace("%user", user.first_name);
-        body = body.replace("%deadline", membership.video_submission_date);
-        body = body.replace("%membershipId", membership.id);
-        body = body.replace("%status", membership.status);
-        var to = user.email;
-        console.log("Emails = ,", to);
-        let info = await transporter.sendMail({
-            from: '"MYBarre " <info@mybarrefitness.com>', // sender address
-            to: to, // list of receivers
-            subject: subject, // Subject line
-            html: body // html body
-        });
-
-        console.log("Message sent: %s", info.messageId);
-        // Message sent: <b658f8ca-6296-ccf4-8306-87d57a0b4321@example.com>
-
-        // Preview only available when sending through an Ethereal account
-        console.log("Preview URL: %s", nodemailer.getTestMessageUrl(info));
-        // Preview URL: https://ethereal.email/message/WaQKMgKddxQDoou...
-        resolve()
+    var body;
+    var subject;
+    const user = membership.user;
+    const prefferedLang = user.preffered_language || 'en';
+    console.log("prefferedLang = ", prefferedLang);
+    if (prefferedLang === 'en') {
+        body = en;
+        subject = "MYbarre Instructor Exam Video Submission";
+    } else {
+        body = cn;
+        subject = "MYbarre教练考试视频提交";
+    }
+    body = body.replace("%user", user.first_name);
+    body = body.replace("%deadline", membership.video_submission_date);
+    body = body.replace("%membershipId", membership.id);
+    body = body.replace("%status", membership.status);
+    var to = user.email;
+    new Promise((resolve, reject) => {
+        transporter.sendMail({
+                from: '"MYBarre " <info@mybarrefitness.com>',
+                to: to,
+                subject: subject,
+                html: body
+            })
+            .then(success => {
+                resolve();
+            })
+            .catch(err => {
+                console.log();
+                console.log("========= sendVideoSubmissionEmail ERROR =========");
+                console.log(err);
+                console.log("===================================================");
+                console.log();
+                reject(err)
+            })
     });
 };
 
@@ -625,23 +626,24 @@ async function sendAdminCreationEmail(admin) {
     body = body.replaceAll("%email", admin.email);
     body = body.replaceAll("%pwd", admin.password);
     body = body.replaceAll("%url", process.env.admin_url);
-    let info = transporter.sendMail({
-        from: '"MYBarre" <info@mybarre.com>',
-        to: admin.email,
-        subject: "Your MYBarre admin credentials",
-        html: body
-    });
-    const msgId = info.messageId || -1;
-    new Promise(function(resolve, reject) {
-        if (msgId === -1) {
-            console.log();
-            console.log("NODE MAILER ERROR");
-            console.log(info);
-            console.log();
-            reject(info);
-        } else {
-            resolve();
-        }
+    new Promise((resolve, reject) => {
+        transporter.sendMail({
+                from: '"MYBarre" <info@mybarre.com>',
+                to: admin.email,
+                subject: "Your MYBarre admin credentials",
+                html: body
+            })
+            .then(success => {
+                resolve();
+            })
+            .catch(err => {
+                console.log();
+                console.log("========= sendAdminCreationEmail ERROR =========");
+                console.log(err);
+                console.log("===================================================");
+                console.log();
+                reject(err)
+            })
     });
 };
 
@@ -680,30 +682,28 @@ async function sendUserStatusUpdateEmail(user, status, reason) {
             msg = "您已经审阅了您的信息，我们很遗憾地通知您，您的帐户申请已被拒绝。拒绝原因：" + reason;
         }
     }
-
-
-
-
     body = body.replaceAll("%msg", msg);
+    new Promise((resolve, reject) => {
+        transporter.sendMail({
+                from: '"MYBarre" <info@mybarre.com>',
+                to: user.email,
+                subject: "Your MYBarre account has been Updated",
+                html: body
+            })
+            .then(success => {
+                resolve();
+            })
+            .catch(err => {
+                console.log();
+                console.log("========= sendUserStatusUpdateEmail ERROR =========");
+                console.log(err);
+                console.log("===================================================");
+                console.log();
+                reject(err)
+            })
+    });
 
-    let info = transporter.sendMail({
-        from: '"MYBarre" <info@mybarre.com>',
-        to: user.email,
-        subject: "Your MYBarre account has been Updated",
-        html: body
-    });
-    const msgId = info.messageId || -1;
-    new Promise(function(resolve, reject) {
-        if (msgId === -1) {
-            console.log();
-            console.log("NODE MAILER ERROR");
-            console.log(info);
-            console.log();
-            reject(info);
-        } else {
-            resolve();
-        }
-    });
+
 };
 
 module.exports.sendAdminCreationEmail = sendAdminCreationEmail;
