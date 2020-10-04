@@ -21,15 +21,15 @@ if (process.env.ENV === 'local') {
             logging: true
         });
 } else if (process.env.ENV === "production") {
-    // sequelize = new Sequelize(
-    //     process.env.db_name,
-    //     "mybarre_admin",
-    //     "mybarrefitness", {
-    //         // host: 'mybarre-fitness.mysql.rds.aliyuncs.com',
-    //         dialect: 'mysql',
-    //         port: 3306,
-    //         logging: true
-    //     });
+    sequelize = new Sequelize(
+        process.env.db_name,
+        "mybarre_admin",
+        "mybarrefitness", {
+            // host: 'mybarre-fitness.mysql.rds.aliyuncs.com',
+            dialect: 'mysql',
+            port: 3306,
+            logging: true
+        });
 }
 
 
