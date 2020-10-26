@@ -25,7 +25,7 @@ if (process.env.ENV === 'local') {
         process.env.db_name,
         "mybarre_admin",
         "mybarrefitness", {
-            // host: 'mybarre-fitness.mysql.rds.aliyuncs.com',
+            host: 'mybarre-fitness.mysql.rds.aliyuncs.com',
             dialect: 'mysql',
             port: 3306,
             logging: true

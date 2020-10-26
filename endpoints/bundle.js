@@ -350,7 +350,10 @@ module.exports = function(app, middleware, db, underscore, responseController) {
 
 
                 db.bundle.findAll({
-                        where: where
+                        where: where,
+                        order: [
+                            ['createdAt', 'DESC']
+                        ]
                     })
                     .then(function(allBundles) {
                         var returnables = [];
@@ -372,7 +375,8 @@ module.exports = function(app, middleware, db, underscore, responseController) {
                                 let index = returnables.findIndex(function(i) {
                                     return i.id === userBundle.id;
                                 });
-                                if (index > 0) {
+                                console.log("index = ", index);
+                                if (index > -1) {
                                     returnables.splice(returnables.findIndex(function(i) {
                                         return i.id === userBundle.id;
                                     }), 1);
@@ -381,6 +385,10 @@ module.exports = function(app, middleware, db, underscore, responseController) {
                             // APPEND USER BUNDLES TO FILTERED ALL BUNDLE
                             returnables.push.apply(returnables, user.bundles);
                         }
+
+                        returnables.sort(function(a, b) {
+                            return new Date(b.createdAt) - new Date(a.createdAt);
+                        });
                         responseController.success(
                             res,
                             200,
@@ -464,6 +472,11 @@ module.exports = function(app, middleware, db, underscore, responseController) {
                         });
 
                         bundles = bundles.filter(val => !existingBundles.includes(val));
+
+
+                        bundles.sort(function(a, b) {
+                            return new Date(b.createdAt) - new Date(a.createdAt);
+                        });
                         responseController.success(res, 200, bundles)
 
 
