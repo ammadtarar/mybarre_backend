@@ -114,8 +114,20 @@ module.exports = function(app, middleware, db, underscore, responseController) {
             }
         }
 
+
+        console.log();
+        console.log();
+        console.log();
+        console.log();
+        console.log();
+        console.log();
+        console.log(where);
+        console.log();
+        console.log();
+        console.log();
+        console.log();
+        console.log();
         db.course.findAndCountAll({
-                where: where,
                 limit: limit,
                 offset: limit * page,
                 order: [

@@ -455,6 +455,9 @@ module.exports = function(app, middleware, db, underscore, responseController) {
                         })
                         .then(function(membership) {
 
+
+
+
                             if (membership) {
                                 db.membership.update({
                                         start: body.start,
@@ -470,7 +473,17 @@ module.exports = function(app, middleware, db, underscore, responseController) {
                                         responseController.success(res, 200, membershipUpdate);
                                     })
                             } else {
-                                responseController.success(res, 200, "User status updated but failed to find membership for the user");
+                                db.membership.create({
+                                        start: body.start,
+                                        end: body.end,
+                                        license_creation_date: body.licenseStart,
+                                        courseId: body.courseId,
+                                        userId: userId
+                                    })
+                                    .then(function(m) {
+                                        responseController.success(res, 200, m);
+                                    })
+
                             }
 
                         })
