@@ -753,6 +753,9 @@ module.exports = function(app, middleware, db, underscore, responseController) {
                     }, {
                         studio_address: {
                             [db.Op.like]: '%' + keyword + '%'
+                        },
+                        email: {
+                            [db.Op.like]: '%' + keyword + '%'
                         }
                     }, ]
                 })
@@ -838,6 +841,14 @@ module.exports = function(app, middleware, db, underscore, responseController) {
             [db.Op.ne]: null
         }
 
+
+        console.log();
+        console.log();
+        console.log();
+        console.log(where);
+        console.log();
+        console.log();
+        console.log();
         db.user.findAndCountAll({
                 where: where,
                 limit: limit,
@@ -848,10 +859,13 @@ module.exports = function(app, middleware, db, underscore, responseController) {
                 include: [membershipInclude]
             })
             .then(function(users) {
+                responseController.success(res, 200, users);
+                return
                 var publicUsers = [];
                 var offset = 0;
                 users.rows.forEach(function(user) {
 
+                    responseController.success(res, 200, user);
 
                     var u = user.toPublicJSON();
                     u['memberships'] = user.memberships
