@@ -281,9 +281,14 @@ module.exports = function(app, middleware, db, underscore, responseController) {
                     }
                 })
                 .then(function(memberships) {
+                    if (memberships === null || memberships === undefined || memberships === 'null') {
+                        resolve(null);
+                        return
+                    }
                     let d = memberships.license_creation_date;
                     if (d === null || d === 'null' || d === undefined || d === '') {
                         resolve(null);
+                        return
                     }
                     try {
                         let start = new Date(d.substring(0, d.indexOf('-') - 1));
@@ -324,6 +329,8 @@ module.exports = function(app, middleware, db, underscore, responseController) {
                 }]
             })
             .then(async function(user) {
+
+
                 let dates = await getUserMembershipLicenseStartDate(user.id);
 
 
@@ -356,6 +363,17 @@ module.exports = function(app, middleware, db, underscore, responseController) {
                         ]
                     })
                     .then(function(allBundles) {
+
+                        responseController.success(
+                            res,
+                            200, {
+                                allBundles: allBundles,
+                                dates: dates,
+                                user
+                            }
+                        );
+                        return
+
                         var returnables = [];
                         if (user.bundles.length <= 0 && allBundles.length <= 0) {
                             returnables = []

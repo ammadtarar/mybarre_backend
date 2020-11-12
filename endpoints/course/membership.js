@@ -127,58 +127,95 @@ module.exports = function(
             return;
         }
 
-        db.course
-            .findOne({
-                where: {
-                    id: body.courseId,
-                },
-            })
-            .then(function(course) {
-                if (course === undefined || course === null || !course) {
-                    responseController.fail(res, 404, "Course not found");
-                    return;
-                }
+        if (!body.courseId) {
+            db.membership
+                .create({
+                    start: '',
+                    end: '',
+                    price: body.price,
+                    out_trade_no: body.out_trade_no,
+                    status: "licensed-instructor",
+                    userId: req.user.id,
+                    couponId: body.couponId,
+                })
+                .then(function(membership) {
+                    responseController.success(res, 200, membership);
 
-                var oneYearFromNow = new Date();
-                oneYearFromNow.setFullYear(oneYearFromNow.getFullYear() + 1);
+                    if (body.couponId) {
+                        db.user_coupons
+                            .create({
+                                couponId: body.couponId,
+                                userId: req.user.id,
+                            })
+                            .then(function(couponresponse) {
+                                console.log("USER COUPON RECORD RESULT");
+                                console.log(couponresponse);
+                            })
+                            .catch(function(couponErr) {
+                                console.log("USER COUPON RECORD ERROR");
+                                console.log(couponErr);
+                            });
+                    }
+                })
+                .catch(function(membershipError) {
+                    responseController.fail(res, 406, membershipError);
+                });
+        } else {
+            db.course
+                .findOne({
+                    where: {
+                        id: body.courseId,
+                    },
+                })
+                .then(function(course) {
+                    if (course === undefined || course === null || !course) {
+                        responseController.fail(res, 404, "Course not found");
+                        return;
+                    }
 
-                db.membership
-                    .create({
-                        start: new Date(),
-                        end: oneYearFromNow,
-                        price: body.price,
-                        out_trade_no: body.out_trade_no,
-                        status: "pre-instructor",
-                        userId: req.user.id,
-                        courseId: course.id,
-                        couponId: body.couponId,
-                    })
-                    .then(function(membership) {
-                        responseController.success(res, 200, membership);
+                    var oneYearFromNow = new Date();
+                    oneYearFromNow.setFullYear(oneYearFromNow.getFullYear() + 1);
 
-                        if (body.couponId) {
-                            db.user_coupons
-                                .create({
-                                    couponId: body.couponId,
-                                    userId: req.user.id,
-                                })
-                                .then(function(couponresponse) {
-                                    console.log("USER COUPON RECORD RESULT");
-                                    console.log(couponresponse);
-                                })
-                                .catch(function(couponErr) {
-                                    console.log("USER COUPON RECORD ERROR");
-                                    console.log(couponErr);
-                                });
-                        }
-                    })
-                    .catch(function(membershipError) {
-                        responseController.fail(res, 406, membershipError);
-                    });
-            })
-            .catch(function(courseErr) {
-                responseController.fail(res, 406, courseErr);
-            });
+                    db.membership
+                        .create({
+                            start: new Date(),
+                            end: oneYearFromNow,
+                            price: body.price,
+                            out_trade_no: body.out_trade_no,
+                            status: "pre-instructor",
+                            userId: req.user.id,
+                            courseId: course.id,
+                            couponId: body.couponId,
+                        })
+                        .then(function(membership) {
+                            responseController.success(res, 200, membership);
+
+                            if (body.couponId) {
+                                db.user_coupons
+                                    .create({
+                                        couponId: body.couponId,
+                                        userId: req.user.id,
+                                    })
+                                    .then(function(couponresponse) {
+                                        console.log("USER COUPON RECORD RESULT");
+                                        console.log(couponresponse);
+                                    })
+                                    .catch(function(couponErr) {
+                                        console.log("USER COUPON RECORD ERROR");
+                                        console.log(couponErr);
+                                    });
+                            }
+                        })
+                        .catch(function(membershipError) {
+                            responseController.fail(res, 406, membershipError);
+                        });
+                })
+                .catch(function(courseErr) {
+                    responseController.fail(res, 406, courseErr);
+                });
+        }
+
+
     });
 
     app.get("/user/my/membership", middleware.requireAuthentication, function(
