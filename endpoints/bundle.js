@@ -364,15 +364,7 @@ module.exports = function(app, middleware, db, underscore, responseController) {
                     })
                     .then(function(allBundles) {
 
-                        responseController.success(
-                            res,
-                            200, {
-                                allBundles: allBundles,
-                                dates: dates,
-                                user
-                            }
-                        );
-                        return
+
 
                         var returnables = [];
                         if (user.bundles.length <= 0 && allBundles.length <= 0) {
