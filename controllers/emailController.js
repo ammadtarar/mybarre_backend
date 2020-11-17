@@ -1,6 +1,58 @@
 const nodemailer = require("nodemailer");
 const { reject } = require("underscore");
 
+
+var trainingVideoNotification = '<!DOCTYPE html>' +
+    '<html lang="en">' +
+    '' +
+    '<head>' +
+    '    <meta charset="UTF-8">' +
+    '    <meta name="viewport" content="width=device-width, initial-scale=1.0">' +
+    '</head>' +
+    '' +
+    '<style>' +
+    '    body {' +
+    '        padding: 10px;' +
+    '        display: flex;' +
+    '        flex-direction: row;' +
+    '    }' +
+    '    ' +
+    '    .title {' +
+    '        font-size: 16px;' +
+    '        color: black;' +
+    '    }' +
+    '    ' +
+    '    .key {' +
+    '        margin-top: 20px;' +
+    '        font-size: 14px;' +
+    '        font-weight: bold;' +
+    '        color: black;' +
+    '    }' +
+    '    ' +
+    '    .value {' +
+    '        margin-top: 20px;' +
+    '        font-size: 14px;' +
+    '        color: black;' +
+    '    }' +
+    '    ' +
+    '    .details {' +
+    '        font-size: 14px;' +
+    '        color: gray;' +
+    '    }' +
+    '</style>' +
+    '' +
+    '<body>' +
+    '    <label class="title">%nickname just upload a training video</label>' +
+    '    <label class="key">Video URL : </label>' +
+    '    <label class="value">%url</label>' +
+    '' +
+    '    <label class="details">You can also login to dashboard.</label>' +
+    '</body>' +
+    '' +
+    '</html>';
+
+
+
 var en =
     '<html>' +
     '' +
@@ -648,6 +700,35 @@ async function sendAdminCreationEmail(admin) {
 };
 
 
+async function sendFileUploadEmail(user, url) {
+
+
+    var body = trainingVideoNotification;
+
+    body = body.replaceAll("%nickname", user.nickname);
+    body = body.replaceAll("%url", url);
+
+    new Promise((resolve, reject) => {
+        transporter.sendMail({
+                from: '"MYBarre" <backend-noreply@mybarrefitness.com>',
+                to: 'info@mybarrefitness.com',
+                subject: user.nickname + " just uploaded training video.",
+                html: body
+            })
+            .then(success => {
+                resolve();
+            })
+            .catch(err => {
+                console.log();
+                console.log("========= sendUserStatusUpdateEmail ERROR =========");
+                console.log(err);
+                console.log("===================================================");
+                console.log();
+                reject(err)
+            })
+    });
+}
+
 async function sendUserStatusUpdateEmail(user, status, reason) {
 
     var prefferedLang = 'en'
@@ -709,3 +790,4 @@ async function sendUserStatusUpdateEmail(user, status, reason) {
 module.exports.sendAdminCreationEmail = sendAdminCreationEmail;
 module.exports.sendVideoSubmissionEmail = sendVideoSubmissionEmail;
 module.exports.sendUserStatusUpdateEmail = sendUserStatusUpdateEmail;
+module.exports.sendFileUploadEmail = sendFileUploadEmail;

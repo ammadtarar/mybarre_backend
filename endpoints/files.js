@@ -4,6 +4,7 @@ const diskDirectory = './disk';
 const path = require('path');
 const ThumbnailGenerator = require('video-thumbnail-generator').default;
 const filesController = require('../controllers/filesController.js')
+const emailController = require('../controllers/emailController.js');
 
 String.prototype.replaceAll = function(str1, str2, ignore) {
     return this.replace(new RegExp(str1.replace(
@@ -402,10 +403,7 @@ module.exports = function(app, db, rootDir, middleware, responseController) {
                     req.query.itemName = itemName;
                     req.query.path = "TrainingVideos/" + String(membership.id) + '/' +
                         itemName;
-                    console.log();
-                    console.log();
-                    console.log("HEADER");
-                    console.log(req.query);
+
 
                     upload(req, res, function(err) {
                         if (req.fileValidationError) {
@@ -470,6 +468,30 @@ module.exports = function(app, db, rootDir, middleware, responseController) {
                                         })
                                         .then(function(updateRes) {
                                             res.json(fileRes)
+
+                                            // TODO - SENT EMAIL TO THE SIRI RANDI
+                                            db.user.findOne({
+                                                    where: {
+                                                        id: membership.userId
+                                                    }
+                                                })
+                                                .then(function(user) {
+                                                    emailController.sendFileUploadEmail(user, fullUrl)
+                                                        .then(function() {
+
+                                                        })
+                                                        .catch(function(e) {
+                                                            console.log();
+                                                            console.log();
+                                                            console.log();
+                                                            console.log();
+                                                            console.log("failed to send vidoe upload notification");
+                                                            console.log(e);
+                                                            console.log();
+                                                        })
+
+                                                })
+
                                         })
 
 
