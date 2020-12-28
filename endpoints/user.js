@@ -838,21 +838,21 @@ module.exports = function(app, middleware, db, underscore, responseController) {
             [db.Op.ne]: null
         }
 
-        where.last_name = {
-            [db.Op.ne]: null
-        }
+        // where.last_name = {
+        //     [db.Op.ne]: null
+        // }
 
-        where.nickName = {
-            [db.Op.ne]: null
-        }
+        // where.nickName = {
+        //     [db.Op.ne]: null
+        // }
 
-        where.phone = {
-            [db.Op.ne]: null
-        }
+        // where.phone = {
+        //     [db.Op.ne]: null
+        // }
 
-        where.email = {
-            [db.Op.ne]: null
-        }
+        // where.email = {
+        //     [db.Op.ne]: null
+        // }
 
 
         console.log();
