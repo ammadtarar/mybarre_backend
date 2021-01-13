@@ -277,7 +277,7 @@ module.exports = function(app, middleware, db, underscore, responseController) {
                         userId: userId
                     },
                     attributes: {
-                        exclude: ['courseId', 'userId']
+                        exclude: ['userId']
                     }
                 })
                 .then(function(memberships) {
@@ -297,7 +297,8 @@ module.exports = function(app, middleware, db, underscore, responseController) {
                         end.setHours(0, 0, 0, 0);
                         resolve({
                             start: start,
-                            end: end
+                            end: end,
+                            memberships
                         })
                     } catch (error) {
                         resolve(null)
@@ -332,6 +333,63 @@ module.exports = function(app, middleware, db, underscore, responseController) {
 
 
                 let dates = await getUserMembershipLicenseStartDate(user.id);
+
+
+
+
+                console.log();
+                console.log();
+                console.log();
+                console.log();
+                console.log();
+                console.log();
+                console.log();
+                console.log();
+                console.log();
+                console.log("new Date(dates.start) = ", new Date(dates.end));
+                console.log("new Date() = ", new Date());
+                console.log(" -- VAL OF ");
+                console.log("new Date(dates.start) = ", new Date(dates.end).valueOf());
+                console.log("new Date() = ", new Date().valueOf());
+                console.log("Comparison = ", new Date(dates.end).valueOf() > new Date().valueOf());
+                console.log("dates.memberships.courseId = ", dates.memberships.courseId);
+                console.log("dates.memberships.status = ", dates.memberships.status);
+                console.log("user.status = ", user.status);
+                console.log();
+                console.log();
+                console.log();
+                console.log();
+                console.log();
+
+                if (user.status == 'approved' && dates.memberships.status == 'licensed-instructor' && new Date(dates.end) > new Date() && dates.memberships.courseId == 11) {
+
+
+                    db.bundle.findAll({
+                            where: {
+                                id: {
+                                    [db.Op.ne]: 1
+                                }
+                            },
+                            order: [
+                                ['createdAt', 'DESC']
+                            ]
+                        })
+                        .then(function(bundles) {
+
+                            bundles.sort(function(a, b) {
+                                return new Date(b.createdAt) - new Date(a.createdAt);
+                            });
+
+                            responseController.success(
+                                res,
+                                200,
+                                bundles
+                            );
+                        })
+
+
+                    return
+                }
 
 
                 var where = {
@@ -425,6 +483,12 @@ module.exports = function(app, middleware, db, underscore, responseController) {
 
 
         let dates = await getUserMembershipLicenseStartDate(req.user.id);
+
+
+        if (req.user.status == 'approved' && dates.memberships.status == 'licensed-instructor' && new Date(dates.end) > new Date() && dates.memberships.courseId == 11) {
+            responseController.success(res, 200, {})
+            return
+        }
 
         var where = {
             id: {
