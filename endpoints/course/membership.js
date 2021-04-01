@@ -473,7 +473,7 @@ module.exports = function(
             db.membership
                 .findOne({
                     where: {
-                        userId: id,
+                        id: id,
                     },
                     include: [{
                         model: db.course,
@@ -499,6 +499,9 @@ module.exports = function(
                         .catch(function(updateErr) {
                             responseController.fail(res, 403, String(updateErr));
                         });
+                })
+                .catch(function(updateErr) {
+                    responseController.fail(res, 403, String(updateErr));
                 });
         }
     );
@@ -685,27 +688,17 @@ module.exports = function(
                 }
             })
             .then(function(membership) {
+
                 let courseId = membership.courseId;
                 let userId = membership.userId;
                 let membershipId = membership.id;
 
                 // CURRENT LICNESE TIME LINE
                 let d = membership.license_creation_date;
-
                 let end_string = d.substring(d.indexOf('-') + 2, d.length);
 
-                ;
-                var new_start, new_end;
-
-                if (new Date(end_string) < new Date()) {
-                    new_start = new Date();
-                    new_end = new Date();
-                } else {
-                    new_start = new Date(end_string);
-                    new_end = new Date(end_string);
-                }
-
-                new_end.setFullYear(new_end.getFullYear() + 1);
+                let new_start = new Date(end_string);
+                let new_end = new Date(new_start.getFullYear() + 1, new_start.getMonth(), new_start.getDate());
 
                 db.license_renewals.create({
                         out_trade_no: body.out_trade_no,
@@ -729,6 +722,9 @@ module.exports = function(
                                     newLicense: newLicense,
                                     membershipUpdate: membershipUpdate
                                 })
+                            })
+                            .catch(function(updateErr) {
+                                responseController.fail(res, 403, updateErr);
                             });
                     });
             })
