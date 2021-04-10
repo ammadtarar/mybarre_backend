@@ -140,10 +140,31 @@ module.exports = function(app, middleware, db, underscore, responseController) {
             })
             .then(function(courses) {
                 console.log(courses);
+                var parsedCourses = [];
+                courses.rows.forEach(element => {
+                    var item = {
+                        id : element.id,
+                        name : element.name,
+                        start : element.start,
+                        end : element.end,
+                        last_signup_date : element.last_signup_date,
+                        price : element.price,
+                        seats : element.seats,
+                        available_seats : element.seats - element.memberships.length || 0,
+                        license_fee : element.license_fee,
+                        venue : element.venue,
+                        memberships : element.memberships,
+                        welcome_doc_url : element.welcome_doc_url
+                    };
+                    parsedCourses.push(item);
+                });
                 responseController.success(
                     res,
                     200,
-                    courses
+                    {
+                        count : courses.rows,
+                        rows : parsedCourses
+                    }
                 );
             })
             .catch(function(e) {

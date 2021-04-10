@@ -486,7 +486,7 @@ module.exports = function(
                     db.membership
                         .update({
                             license_out_trade_no: out_trade_no,
-                            status: "license-fee-paid",
+                            status: "licensed-instructor",
                             license_fee: price,
                         }, {
                             where: {
