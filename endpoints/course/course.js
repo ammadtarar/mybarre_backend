@@ -162,7 +162,7 @@ module.exports = function(app, middleware, db, underscore, responseController) {
                     res,
                     200,
                     {
-                        count : courses.rows,
+                        count : courses.count,
                         rows : parsedCourses
                     }
                 );
