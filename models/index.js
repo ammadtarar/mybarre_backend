@@ -18,6 +18,11 @@ if (config.use_env_variable) {
     config);
 }
 
+
+
+// TEST 
+
+
 fs
   .readdirSync(__dirname)
   .filter(file => {
