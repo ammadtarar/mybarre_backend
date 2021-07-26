@@ -1,6 +1,7 @@
 const fs = require("fs-extra");
 const diskDirectory = "./disk";
 const path = require("path");
+const moment = require('moment');
 
 function isEmpty(obj) {
   for (var prop in obj) {
@@ -250,7 +251,56 @@ module.exports = function (
           ],
         })
         .then(function (memberships) {
-          responseController.success(res, 200, memberships);
+          if (memberships) {
+            let d = memberships.license_creation_date;
+            let start = new Date(d.substring(0, d.indexOf("-") - 1));
+            start.setHours(0, 0, 0, 0);
+            let end = new Date(d.substring(d.indexOf("-") + 2, d.length));
+            end.setHours(0, 0, 0, 0);
+            if (end < new Date()) {
+              db.license_renewals.findAll({
+                where: {
+                  userId: req.user.id
+                },
+                order: [["createdAt", "DESC"]],
+              })
+                .then(renewals => {
+                  if (!renewals || renewals.length <= 0) {
+                    responseController.success(res, 200, memberships);
+                  } else {
+                    let latestRenewal = renewals[0];
+                    let latestExpiry = latestRenewal.end;
+                    let newLicenseTimeline = moment(start).format('YYYY/MM/DD') + " - " + moment(latestExpiry).format(
+                      'YYYY/MM/DD');
+                    let newMembership = {
+                      start: memberships.start,
+                      end: memberships.end,
+                      last_notification_date: memberships.last_notification_date,
+                      license_creation_date: newLicenseTimeline,
+                      video_submission_date: memberships.video_submission_date,
+                      id: memberships.id,
+                      price: memberships.price,
+                      out_trade_no: memberships.out_trade_no,
+                      status: memberships.status,
+                      license_out_trade_no: memberships.license_out_trade_no,
+                      license_fee: memberships.license_fee,
+                      certificate_url: memberships.certificate_url,
+                      createdAt: memberships.createdAt,
+                      updatedAt: memberships.updatedAt,
+                      couponId: memberships.couponId,
+                      course: memberships.course,
+                      training_videos: memberships.training_videos
+                    }
+                    responseController.success(res, 200, newMembership);
+                  }
+                  console.log("=====")
+                });
+            } else {
+              responseController.success(res, 200, memberships);
+              console.log("=====")
+            }
+
+          }
         });
     }
   );
@@ -408,7 +458,7 @@ module.exports = function (
               responseController.fail(res, 403, updateErr);
             });
         })
-        .catch(function (err) {});
+        .catch(function (err) { });
     }
   );
 
@@ -727,6 +777,7 @@ module.exports = function (
 
           // CURRENT LICNESE TIME LINE
           let d = membership.license_creation_date;
+          let originalStart = new Date(d.substring(0, d.indexOf("-") - 1));
           let end_string = d.substring(d.indexOf("-") + 2, d.length);
 
           let new_start = new Date(end_string);
@@ -743,30 +794,30 @@ module.exports = function (
               courseId: courseId,
               userId: userId,
               membershipId: membershipId,
-              start: new_start,
+              start: originalStart,
               end: new_end,
             })
             .then(function (newLicense) {
-              db.membership
-                .update(
-                  {
-                    license_creation_date: new_start,
-                  },
-                  {
-                    where: {
-                      id: membership.id,
-                    },
-                  }
-                )
-                .then(function (membershipUpdate) {
-                  res.json({
-                    newLicense: newLicense,
-                    membershipUpdate: membershipUpdate,
-                  });
-                })
-                .catch(function (updateErr) {
-                  responseController.fail(res, 403, updateErr);
-                });
+              // db.membership
+              //   .update(
+              //     {
+              //       license_creation_date: new_start,
+              //     },
+              //     {
+              //       where: {
+              //         id: membership.id,
+              //       },
+              //     }
+              //   )
+              //   .then(function (membershipUpdate) {
+
+              //   })
+              //   .catch(function (updateErr) {
+              //     responseController.fail(res, 403, updateErr);
+              //   });
+              res.json({
+                newLicense: newLicense
+              });
             });
         })
         .catch(function (updateErr) {

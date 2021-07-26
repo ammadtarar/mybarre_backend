@@ -1,5 +1,5 @@
 const moment = require('moment');
-module.exports = function(sequelize, DataTypes) {
+module.exports = function (sequelize, DataTypes) {
 	return sequelize.define('membership', {
 		start: {
 			type: DataTypes.DATE,
@@ -67,6 +67,7 @@ module.exports = function(sequelize, DataTypes) {
 			allowNull: true,
 			get() {
 				const ori = this.getDataValue('license_creation_date') || null;
+				console.log("Licnese creation date = ", ori);
 				if (ori === null) {
 					return "";
 				} else {

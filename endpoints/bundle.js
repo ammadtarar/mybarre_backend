@@ -338,11 +338,44 @@ module.exports = function (
             start.setHours(0, 0, 0, 0);
             let end = new Date(d.substring(d.indexOf("-") + 2, d.length));
             end.setHours(0, 0, 0, 0);
-            resolve({
-              start: start,
-              end: end,
-              memberships,
-            });
+
+            if (end < new Date()) {//Original membership has expired
+              console.log('=== expired');
+              console.log('end = ', end)
+              console.log('today = ', new Date());
+              db.license_renewals.findAll({
+                where: {
+                  userId: userId
+                },
+                order: [["createdAt", "DESC"]],
+              })
+                .then(renewals => {
+                  if (!renewals || renewals.length <= 0) {
+                    resolve({
+                      start: start,
+                      end: end,
+                      memberships,
+                    });
+                  } else {
+                    let latest = renewals[0];
+                    var newEnd = new Date(latest.end);
+                    newEnd.setHours(0, 0, 0, 0);
+                    resolve({
+                      start: start,
+                      end: newEnd,
+                      memberships,
+                    });
+                  }
+                })
+              //TODO - Get the renewed membership 
+            } else {
+              resolve({
+                start: start,
+                end: end,
+                memberships,
+              });
+            }
+
           } catch (error) {
             resolve(null);
           }
@@ -385,17 +418,17 @@ module.exports = function (
           console.log();
           console.log();
           console.log();
+          console.log("===== USER CE =======");
           console.log();
           console.log();
           console.log();
-          console.log();
-          console.log();
-          console.log("new Date(dates.start) = ", new Date(dates.end));
-          console.log("new Date() = ", new Date());
-          console.log(" -- VAL OF ");
-          console.log("new Date(dates.start) = ", new Date(dates.start));
-          console.log("new Date(dates.end) = ", new Date(dates.end));
-          console.log("new Date() = ", new Date());
+          console.log(JSON.parse(JSON.stringify(dates)));
+          // console.log("new Date(dates.start) = ", new Date(dates.end));
+          // console.log("new Date() = ", new Date());
+          // console.log(" -- VAL OF ");
+          // console.log("new Date(dates.start) = ", new Date(dates.start));
+          // console.log("new Date(dates.end) = ", new Date(dates.end));
+          // console.log("new Date() = ", new Date());
           console.log(
             "Comparison = ",
             new Date(dates.end).valueOf() > new Date().valueOf()
@@ -411,11 +444,7 @@ module.exports = function (
             "dates.memberships.courseId = ",
             dates.memberships.courseId
           );
-          console.log();
-          console.log();
-          console.log();
-          console.log();
-          console.log();
+
 
           if (
             user.status == "approved" &&
@@ -459,12 +488,21 @@ module.exports = function (
             };
           }
 
+          console.log("WHERE = ")
+          console.log(where)
+
           db.bundle
             .findAll({
               where: where,
               order: [["createdAt", "DESC"]],
             })
             .then(function (allBundles) {
+
+
+              console.log("allBundles.length = ", allBundles.length);
+              console.log("user.bundles.length = ", user.bundles.length);
+              console.log();
+              console.log();
               var returnables = [];
               if (user.bundles.length <= 0 && allBundles.length <= 0) {
                 returnables = [];
@@ -519,8 +557,6 @@ module.exports = function (
     middleware.requireAuthentication,
     async function (req, res) {
       let dates = await getUserMembershipLicenseStartDate(req.user.id);
-
-      console.log(dates);
 
       if (
         req.user.status == "approved" &&
@@ -592,7 +628,6 @@ module.exports = function (
             });
         })
         .catch(function (e) {
-          console.log(e);
           responseController.fail(res, 406, e);
         });
     }
